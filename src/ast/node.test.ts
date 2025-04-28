@@ -366,6 +366,7 @@ describe('transform', function () {
         content: 'Content\n',
         language: 'js',
         id: 'id',
+        meta: '{% z=true .class y=2 x="1" #id %} ',
         class: { class: true },
         z: true,
         y: 2,

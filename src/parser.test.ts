@@ -228,7 +228,7 @@ describe('Markdown parser', function () {
       `);
 
       const complex = convert(`
-      ${fence}ruby this is a test
+      ${fence}ruby this is a meta string
       This is a test
       ${fence}
       `);
@@ -247,6 +247,7 @@ describe('Markdown parser', function () {
       expect(complex.children[0].attributes).toDeepEqual({
         language: 'ruby',
         content: 'This is a test\n',
+        meta: 'this is a meta string'
       });
 
       expect(empty.children[0].attributes).toDeepEqual({
@@ -451,6 +452,49 @@ describe('Markdown parser', function () {
           {
             type: 'fence',
             attributes: { language: 'ruby', content: 'puts "foo"\n' },
+          },
+        ],
+      });
+    });
+
+    it('with meta information', function () {
+      const example = convert(`
+      ${fence}ruby my-meta-info
+      puts "foo"
+      ${fence}
+      `);
+
+      expect(example).toDeepEqualSubset({
+        type: 'document',
+        children: [
+          {
+            type: 'fence',
+            attributes: { 
+              language: 'ruby', 
+              meta: 'my-meta-info',
+              content: 'puts "foo"\n' 
+            },
+          },
+        ],
+      });
+    });
+
+    it('with empty meta information', function () {
+      const example = convert(`
+      ${fence}ruby 
+      puts "foo"
+      ${fence}
+      `);
+
+      expect(example).toDeepEqualSubset({
+        type: 'document',
+        children: [
+          {
+            type: 'fence',
+            attributes: { 
+              language: 'ruby',
+              content: 'puts "foo"\n' 
+            },
           },
         ],
       });
