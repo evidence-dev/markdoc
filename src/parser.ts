@@ -64,10 +64,11 @@ function handleAttrs(token: Token, type: string) {
     case 'comment':
       return { content: (token.meta || {}).variable || token.content };
     case 'fence': {
-      const [language] = token.info.split(' ', 1);
-      return language === '' || language === OPEN
-        ? { content: token.content }
-        : { content: token.content, language };
+      const [language, ...metaParts] = token.info.split(/\s+/);
+      const attrs: { content: string; language?: string; meta?: string } = { content: token.content };
+      if (language && language !== OPEN) attrs.language = language;
+      if (metaParts.length > 0) attrs.meta = metaParts.join(' ');
+      return attrs;
     }
     case 'td':
     case 'th': {

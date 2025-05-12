@@ -54,6 +54,7 @@ export const fence: Schema = {
   attributes: {
     content: { type: String, render: false, required: true },
     language: { type: String, render: 'data-language' },
+    meta: { type: String, render: 'meta' },
     process: { type: Boolean, render: false, default: true },
   },
   transform(node, config) {
