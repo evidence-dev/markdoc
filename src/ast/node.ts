@@ -16,6 +16,7 @@ import type {
 export default class Node implements AstType {
   readonly $$mdtype = 'Node';
 
+  parent?: Node;
   attributes: Record<string, any>;
   slots: Record<string, Node>;
   children: Node[];
@@ -36,6 +37,7 @@ export default class Node implements AstType {
   ) {
     this.attributes = attributes;
     this.children = children;
+    children.forEach((child) => (child.parent = this));
     this.type = type;
     this.tag = tag;
     this.annotations = [];
@@ -51,6 +53,7 @@ export default class Node implements AstType {
 
   push(node: Node) {
     this.children.push(node);
+    node.parent = this;
   }
 
   resolve(config: Config = {}): Node {

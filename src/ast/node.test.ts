@@ -75,6 +75,24 @@ baz
       'text',
     ]);
   });
+
+  it('should set parent on children via constructor', () => {
+    const child = new Node('paragraph', {});
+    const parent = new Node('document', {}, [child]);
+
+    expect(child.parent).toBe(parent);
+  });
+
+  describe('push', () => {
+    it('should add child to children and set their parent', () => {
+      const child = new Node('paragraph', {});
+      const parent = new Node('document', {});
+
+      parent.push(child);
+
+      expect(child.parent).toBe(parent);
+    });
+  });
 });
 
 describe('transform', function () {
