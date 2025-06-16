@@ -13,8 +13,14 @@ import type {
   ValidationError,
 } from '../types';
 
+let idCounter = 0;
+const getId = (): string => {
+  return `node-${idCounter++}`;
+};
+
 export default class Node implements AstType {
   readonly $$mdtype = 'Node';
+  readonly id = getId();
 
   parent?: Node;
   attributes: Record<string, any>;
