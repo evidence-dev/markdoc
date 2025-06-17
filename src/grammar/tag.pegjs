@@ -137,20 +137,23 @@ ValueArrayTail =
 
 ValueHash =
   '{' _*
-  value:(
-    head:ValueHashItem
-    tail:ValueHashTail*
-    TrailingComma { return Object.assign(head, ...tail); }
+  items:(
+    first:ValueHashItem
+    rest:(_* ValueHashItem)* {
+      const all = [first, ...rest.map(([_, item]) => item)];
+      return Object.assign({}, ...all);
+    }
   )?
-  _* '}' { return value || {}; }
-
-ValueHashTail =
-  _* ',' _* item:ValueHashItem { return item; }
+  _* '}' {
+    return items || {};
+  }
     
 ValueHashItem =
   key:(Identifier / ValueString)
-  ':'
-  _* value:Value { return key === "$$mdtype" ? {} : {[key]: value}; }
+  _* '=' _*
+  value:Value {
+    return key === "$$mdtype" ? {} : { [key]: value };
+  }
 
 ValueNumber 'number' =
   '-'? [0-9]+ ('.'[0-9]+)? { return parseFloat(text()); }

@@ -266,17 +266,14 @@ describe('Markdoc tag parser', function () {
 
     describe('with complex values', function () {
       it('with a simple hash literal value', function () {
-        const example = parse('foo={bar: true}');
+        const example = parse('foo={bar=true}');
         expect(example.meta.attributes).toDeepEqual([
           { type: 'attribute', name: 'foo', value: { bar: true } },
         ]);
       });
 
       it('with a nested hash literal value', function () {
-        const example1 = parse(
-          'foo={bar: true, baz: {test: "this is a test"}}'
-        );
-        const example2 = parse('foo={bar:true,baz:{test:"this is a test"}}');
+        const example = parse('foo={bar=true\nbaz={test="this is a test"}}');
         const expected = [
           {
             type: 'attribute',
@@ -288,19 +285,18 @@ describe('Markdoc tag parser', function () {
           },
         ];
 
-        expect(example1.meta.attributes).toDeepEqual(expected);
-        expect(example2.meta.attributes).toDeepEqual(expected);
+        expect(example.meta.attributes).toDeepEqual(expected);
       });
 
       it('with a hash literal that has string keys', function () {
-        const example = parse('foo={bar: true, "baz": 1}');
+        const example = parse('foo={bar=true "baz"=1}');
         expect(example.meta.attributes).toDeepEqual([
           { type: 'attribute', name: 'foo', value: { bar: true, baz: 1 } },
         ]);
       });
 
       it('with multiple hash literal values', function () {
-        const example = parse('foo={bar: true} baz={test: "testing"}');
+        const example = parse('foo={ bar=true } baz={test="testing"}');
         expect(example.meta.attributes).toDeepEqual([
           { type: 'attribute', name: 'foo', value: { bar: true } },
           { type: 'attribute', name: 'baz', value: { test: 'testing' } },
@@ -344,7 +340,7 @@ describe('Markdoc tag parser', function () {
       });
 
       it('with array and object literals', function () {
-        const example = parse('foo=[1, 2, {bar: "baz", test: [1, 2, 3]}]');
+        const example = parse('foo=[1, 2, {bar="baz" test=[1, 2, 3]}]');
         expect(example.meta.attributes).toDeepEqual([
           {
             type: 'attribute',
