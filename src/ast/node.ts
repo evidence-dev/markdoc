@@ -25,7 +25,6 @@ export default class Node implements AstType {
   parent?: Node;
   attributes: Record<string, any>;
   slots: Record<string, Node>;
-  children: Node[];
   errors: ValidationError[] = [];
   lines: number[] = [];
   type: NodeType;
@@ -35,6 +34,17 @@ export default class Node implements AstType {
   inline = false;
   location?: Location;
 
+  get children() {
+    return this.#children;
+  }
+
+  set children(newChildren: Node[]) {
+    newChildren.forEach((child) => (child.parent = this));
+    this.#children = newChildren;
+  }
+
+  #children: Node[] = [];
+
   constructor(
     type: NodeType = 'node',
     attributes: Record<string, any> = {},
@@ -43,7 +53,6 @@ export default class Node implements AstType {
   ) {
     this.attributes = attributes;
     this.children = children;
-    children.forEach((child) => (child.parent = this));
     this.type = type;
     this.tag = tag;
     this.annotations = [];
