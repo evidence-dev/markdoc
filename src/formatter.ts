@@ -190,8 +190,16 @@ function* formatNode(n: Node, o: Options = {}) {
       break;
     }
     case 'link': {
+      const children = [...formatChildren(n, no)].join('');
+
+      // https://spec.commonmark.org/0.31.2/#autolinks
+      if (children === n.attributes.href && !n.attributes.title) {
+        yield `<${n.attributes.href}>`;
+        break;
+      }
+
       yield '[';
-      yield* formatChildren(n, no);
+      yield children;
       yield ']';
       yield '(';
       yield* typeof n.attributes.href === 'string'
@@ -453,7 +461,7 @@ function* formatNode(n: Node, o: Options = {}) {
 }
 
 function* formatValue(
-  v: Value,
+  v: Value | Value[],
   o: Options = {}
 ): Generator<string, void, unknown> {
   switch (typeof v) {
@@ -491,7 +499,7 @@ function* formatValue(
   }
 }
 
-export default function format(v: Value, options?: Options): string {
+export default function format(v: Value | Value[], options?: Options): string {
   let doc = '';
   for (const s of formatValue(v, options)) doc += s;
   return doc.trimStart();
