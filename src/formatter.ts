@@ -59,7 +59,7 @@ function formatScalar(v: Value): string | undefined {
       Object.entries(v)
         .map(
           ([key, value]) =>
-            `${isIdentifier(key) ? key : `"${key}"`}: ${formatScalar(value)}`
+            `${isIdentifier(key) ? key : `"${key}"`}=${formatScalar(value)}`
         )
         .join(SEP) +
       '}'
