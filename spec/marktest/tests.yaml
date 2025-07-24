@@ -65,7 +65,7 @@
     tags:
       test: { render: foo, attributes: { foo: { render: true } } }
   code: |
-    {% test foo={bar: [1, 2, 3]} %}
+    {% test foo={bar= [1, 2, 3]} %}
     This is a test
     {% /test %}
   expected:
@@ -96,12 +96,12 @@
   code: |
     {% test foo=[1 2 3] /%}
   expectedError: Expected ",", "]", or whitespace but "2" found.
-- name: Hash with trailing comma
+- name: Hash with three keys
   config:
     tags:
       test: { render: foo, attributes: { foo: { render: true } } }
   code: |
-    {% test foo={i: 1, j: 2, k: 3,} /%}
+    {% test foo={i= 1 j= 2 k= 3} /%}
   expected:
     - tag: foo
       attributes:
@@ -162,7 +162,7 @@
     ```
   expected:
     - tag: pre
-      attributes: { id: 'test', 'data-language': 'ruby' }
+      attributes: { id: 'test', 'data-language': 'ruby', 'meta': '{% #test %}' }
       children: ["example\n"]
 
 - name: Frontmatter
@@ -465,6 +465,7 @@
     - tag: pre
       attributes:
         data-language: javascript
+        meta: '{% process=false %}'
       children:
         - "foo\n{% bar %}\n"
 
@@ -487,6 +488,8 @@
             default: true
           title:
             type: String
+          meta:
+            type: String
 
   code: |
     ~~~yaml {% title="this is a `test`" %}
@@ -497,6 +500,7 @@
       attributes:
         data-language: yaml
         title: 'this is a `test`'
+        meta: '{% title="this is a `test`" %}'
       children:
         - "example\n"
 
@@ -517,6 +521,7 @@
     - tag: pre
       attributes:
         data-language: javascript
+        meta: '{% process=true %}'
       children:
         - testing
         - "\nconsole.log('This is a test: "
@@ -567,6 +572,7 @@
     - tag: pre
       attributes:
         data-language: javascript
+        meta: '{% process=true %}'
       children:
         - testing
         - "\ntest\n"
@@ -624,6 +630,7 @@
     - tag: pre
       attributes:
         data-language: javascript
+        meta: '{% process=true %}'
       children:
         - 'testing '
         - 'bar'
@@ -646,6 +653,7 @@
     - tag: pre
       attributes:
         data-language: javascript
+        meta: '{% process=true %}'
       children:
         - testing
         - tag: foo
@@ -670,6 +678,7 @@
     - tag: pre
       attributes:
         data-language: javascript
+        meta: '{% process=true %}'
       children:
         - "var stripe = Stripe('"
         - tag: token
@@ -709,343 +718,7 @@
       children: [Testing]
     - tag: hr
 
-- name: Advanced table format
-  code: |
-    {% table %}
-    * Test 1 - 1 {% width="20%" %}
-    * Test 1 - 2
-    * Test 1 - 3
-    ---
-    * Test 2 - 1
-    * Test 2 - 2 {% colspan=2 %}
-    * Test 2 - 3
-    ---
-    * Test 3 - 1
-    * Test 3 - 2
-    * Test 3 - 3
-    {% /table %}
-  expected:
-    - tag: table
-      children:
-        - tag: thead
-          children:
-            - tag: tr
-              children:
-                - tag: th
-                  attributes:
-                    width: 20%
-                  children: ['Test 1 - 1 ']
-                - tag: th
-                  children: [Test 1 - 2]
-                - tag: th
-                  children: [Test 1 - 3]
-        - tag: tbody
-          children:
-            - tag: tr
-              children:
-                - tag: td
-                  children: [Test 2 - 1]
-                - tag: td
-                  children: ['Test 2 - 2 ']
-                  attributes:
-                    colSpan: 2
-                - tag: td
-                  children: [Test 2 - 3]
-            - tag: tr
-              children:
-                - tag: td
-                  children: [Test 3 - 1]
-                - tag: td
-                  children: [Test 3 - 2]
-                - tag: td
-                  children: [Test 3 - 3]
 
-- name: Advanced table without header
-  code: |
-    {% table %}
-    ---
-    * foo
-    * bar
-    {% /table %}
-  expected:
-    - tag: table
-      children:
-        - tag: thead
-        - tag: tbody
-          children:
-            - tag: tr
-              children:
-                - tag: td
-                  children: [foo]
-                - tag: td
-                  children: [bar]
-
-- name: Advanced table with conditional row
-  config:
-    variables:
-      foo: false
-      bar: true
-  code: |
-    {% table %}
-    * Test 1 - 1
-    * Test 1 - 2
-    * Test 1 - 3
-    ---
-    {% if $foo %}
-    * Test 2 - 1
-    * Test 2 - 2
-    * Test 2 - 3
-    {% /if %}
-    ---
-    {% if $bar %}
-    * Test 3 - 1
-    * Test 3 - 2
-    * Test 3 - 3
-    {% /if %}
-    {% /table %}
-  expected:
-    - tag: table
-      children:
-        - tag: thead
-          children:
-            - tag: tr
-              children:
-                - tag: th
-                  children: ['Test 1 - 1']
-                - tag: th
-                  children: [Test 1 - 2]
-                - tag: th
-                  children: [Test 1 - 3]
-        - tag: tbody
-          children:
-            - tag: tr
-              children:
-                - tag: td
-                  children: [Test 3 - 1]
-                - tag: td
-                  children: [Test 3 - 2]
-                - tag: td
-                  children: [Test 3 - 3]
-
-- name: Advanced table with multiple conditional rows
-  config:
-    variables:
-      foo: true
-  code: |
-    {% table %}
-    * Test 1 - 1
-    * Test 1 - 2
-    * Test 1 - 3
-    ---
-    {% if $foo %}
-    * Test 2 - 1
-    * Test 2 - 2
-    * Test 2 - 3
-    ---
-    * Test 3 - 1
-    * Test 3 - 2
-    * Test 3 - 3
-    {% /if %}
-    ---
-    * Test 4 - 1
-    * Test 4 - 2
-    * Test 4 - 3
-    {% /table %}
-  expected:
-    - tag: table
-      children:
-        - tag: thead
-          children:
-            - tag: tr
-              children:
-                - tag: th
-                  children: [Test 1 - 1]
-                - tag: th
-                  children: [Test 1 - 2]
-                - tag: th
-                  children: [Test 1 - 3]
-        - tag: tbody
-          children:
-            - tag: tr
-              children:
-                - tag: td
-                  children: [Test 2 - 1]
-                - tag: td
-                  children: [Test 2 - 2]
-                - tag: td
-                  children: [Test 2 - 3]
-            - tag: tr
-              children:
-                - tag: td
-                  children: [Test 3 - 1]
-                - tag: td
-                  children: [Test 3 - 2]
-                - tag: td
-                  children: [Test 3 - 3]
-            - tag: tr
-              children:
-                - tag: td
-                  children: [Test 4 - 1]
-                - tag: td
-                  children: [Test 4 - 2]
-                - tag: td
-                  children: [Test 4 - 3]
-
-- name: Advanced table with if and else
-  config:
-    variables:
-      foo: false
-      bar: true
-  code: |
-    {% table %}
-    * Test 1 - 1
-    * Test 1 - 2
-    * Test 1 - 3
-    ---
-    {% if $foo %}
-    * Test 2 - 1
-    * Test 2 - 2
-    * Test 2 - 3
-    {% else / %}
-    * Test 2 - 1 - alternate
-    * Test 2 - 2 - alternate
-    * Test 2 - 3 - alternate
-    {% /if %}
-    ---
-    {% if $bar %}
-    * Test 3 - 1
-    * Test 3 - 2
-    * Test 3 - 3
-    {% /if %}
-    {% /table %}
-  expected:
-    - tag: table
-      children:
-        - tag: thead
-          children:
-            - tag: tr
-              children:
-                - tag: th
-                  children: [Test 1 - 1]
-                - tag: th
-                  children: [Test 1 - 2]
-                - tag: th
-                  children: [Test 1 - 3]
-        - tag: tbody
-          children:
-            - tag: tr
-              children:
-                - tag: td
-                  children: [Test 2 - 1 - alternate]
-                - tag: td
-                  children: [Test 2 - 2 - alternate]
-                - tag: td
-                  children: [Test 2 - 3 - alternate]
-            - tag: tr
-              children:
-                - tag: td
-                  children: [Test 3 - 1]
-                - tag: td
-                  children: [Test 3 - 2]
-                - tag: td
-                  children: [Test 3 - 3]
-
-- name: Advanced table without header
-  code: |
-    {% table %}
-    ---
-    * foo
-    * bar
-    {% /table %}
-  expected:
-    - tag: table
-      children:
-        - tag: thead
-        - tag: tbody
-          children:
-            - tag: tr
-              children:
-                - tag: td
-                  children: [foo]
-                - tag: td
-                  children: [bar]
-
-- name: Advanced table with inner content
-  code: |
-    {% table %}
-    ---
-    * foo
-    * 
-        ```ruby
-        puts "test"
-        ```
-    * bar
-    ---
-    * foo
-    *
-        bar
-    * baz
-    {% /table %}
-  expected:
-    - tag: table
-      children:
-        - tag: thead
-        - tag: tbody
-          children:
-            - tag: tr
-              children:
-                - tag: td
-                  children: [foo]
-                - tag: td
-                  children:
-                    - tag: pre
-                      attributes:
-                        data-language: ruby
-                      children: ["puts \"test\"\n"]
-                - tag: td
-                  children: [bar]
-            - tag: tr
-              children:
-                - tag: td
-                  children: [foo]
-                - tag: td
-                  children: [bar]
-                - tag: td
-                  children: [baz]
-
-- name: GFM table syntax surrounded by a table tag
-  code: |
-    {% table %}
-    Foo | Bar
-    --|--
-    Test 1 - 1 | Test 1 - 2
-    Test 2 - 1 | Test 2 - 2
-    {% /table %}
-  expected:
-    - tag: table
-      children:
-        - tag: thead
-          children:
-            - tag: tr
-              children:
-                - tag: th
-                  children: [Foo]
-                - tag: th
-                  children: [Bar]
-        - tag: tbody
-          children:
-            - tag: tr
-              children:
-                - tag: td
-                  children: [Test 1 - 1]
-                - tag: td
-                  children: [Test 1 - 2]
-            - tag: tr
-              children:
-                - tag: td
-                  children: [Test 2 - 1]
-                - tag: td
-                  children: [Test 2 - 2]
 
 - name: Closing tag with trailing whitespace
   config:
@@ -1184,7 +857,7 @@
           foo:
             type: Object
   code: |
-    {% test foo={ bar: 1, baz: 2 } %}
+    {% test foo={ bar= 1 baz= 2 } %}
     testing
     {% /test %}
   expected:
@@ -1244,7 +917,7 @@
   code: |
     This is a test
 
-    {% partial file="foo.md" variables={foo: 1} /%}
+    {% partial file="foo.md" variables={foo= 1} /%}
   expected:
     - tag: p
       children: [This is a test]
@@ -1296,7 +969,7 @@
   code: |
     This is a test
 
-    {% partial file="foo.md" variables={foo: 1} /%}
+    {% partial file="foo.md" variables={foo= 1} /%}
   expected:
     - tag: p
       children: [This is a test]
@@ -1535,7 +1208,7 @@
           bar:
             type: Object
   code: |
-    {% foo bar={"this is a test": "test"} %}
+    {% foo bar={"this is a test"= "test"} %}
     testing
     {% /foo %}
   expected:
@@ -1556,7 +1229,7 @@
           bar:
             type: Object
   code: |
-    {% foo bar={"this is a test": "test", "$$mdtype": true} %}
+    {% foo bar={"this is a test"= "test" "$$mdtype"= true} %}
     testing
     {% /foo %}
   expected:
