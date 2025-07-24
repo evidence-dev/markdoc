@@ -469,6 +469,37 @@
       children:
         - "foo\n{% bar %}\n"
 
+- name: Using a variable in a fenced code block
+  config:
+    variables:
+      bar: test
+  code: |
+    ```javascript
+    foo {{ $bar }}
+    ```
+  expected:
+    - tag: pre
+      attributes:
+        data-language: javascript
+      children:
+        - "foo test\n"
+
+- name: Using an undefined variable in a fenced code block
+  config:
+    variables:
+      bar: test
+  validation: false
+  code: |
+    ```javascript
+    foo {{ $undefinedVar }}
+    ```
+  expected:
+    - tag: pre
+      attributes:
+        data-language: javascript
+      children:
+        - "foo {{ $undefinedVar }}\n"
+
 - name: Using a backtick in a fenced code block string attribute
   config:
     nodes:

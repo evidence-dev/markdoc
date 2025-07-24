@@ -1,5 +1,6 @@
 import type { Schema } from './types';
 import Tag from './tag';
+import { interpolateFence } from './utils';
 
 export const document: Schema = {
   render: 'article',
@@ -59,9 +60,20 @@ export const fence: Schema = {
   },
   transform(node, config) {
     const attributes = node.transformAttributes(config);
-    const children = node.children.length
-      ? node.transformChildren(config)
-      : [node.attributes.content];
+    let children;
+    
+    if (node.children.length) {
+      children = node.transformChildren(config).map(child => {
+        if (typeof child === 'string') {
+          const interpolation = interpolateFence(child, config.variables);
+          return interpolation.result;
+        }
+        return child;
+      });
+    } else {
+      const interpolation = interpolateFence(node.attributes.content, config.variables);
+      children = [interpolation.result];
+    }
 
     return new Tag('pre', attributes, children);
   },
