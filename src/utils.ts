@@ -31,7 +31,7 @@ export interface InterpolationResult {
 export function interpolateString(value: string, variables?: Record<string, any>): InterpolationResult {
   const undefinedVariables: string[] = [];
   
-  const result = value.replace(/\$([a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*)/g, (match, path) => {
+  const result = value.replace(/#([a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*)/g, (match, path) => {
     if (!variables) return match;
     
     const pathParts = path.split('.');

@@ -70,7 +70,7 @@ function block(
     .slice(start, tagEnd + CLOSE.length)
     .split('\n').length;
 
-  if (content[0] === '$') return false;
+  if (content[0] === '#') return false;
 
   if (silent) return true;
 
