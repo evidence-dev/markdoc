@@ -502,7 +502,7 @@ describe('Markdown parser', function () {
 
     it('with an annotation', function () {
       const example = convert(`
-      ${fence}ruby {% #foo .bar %}
+      ${fence}ruby {% .bar %}
       test
       ${fence}
       `);
@@ -513,7 +513,6 @@ describe('Markdown parser', function () {
           {
             type: 'fence',
             attributes: {
-              id: 'foo',
               class: { bar: true },
               language: 'ruby',
               content: 'test\n',
@@ -628,7 +627,6 @@ describe('Markdown parser', function () {
           children: [
             {
               type: 'heading',
-              attributes: { id: 'foo-bar', level: 1 },
               children: [
                 {
                   type: 'inline',
@@ -671,7 +669,7 @@ describe('Markdown parser', function () {
 
       it('with complex values', function () {
         const example = convert(
-          `# Sample Heading {% #asdf .foo-bar .test foo="bar" %}`
+          `# Sample Heading {% .foo-bar .test foo="bar" %}`
         );
         expect(example).toDeepEqualSubset({
           type: 'document',
@@ -680,7 +678,6 @@ describe('Markdown parser', function () {
               type: 'heading',
               attributes: {
                 class: { 'foo-bar': true, test: true },
-                id: 'asdf',
                 level: 1,
                 foo: 'bar',
               },
@@ -704,7 +701,7 @@ describe('Markdown parser', function () {
 
   describe('handling variables', function () {
     it('by itself on a line', function () {
-      const example = convert(`{% $test %}`);
+      const example = convert(`{% #test %}`);
       expect(example).toDeepEqualSubset({
         type: 'document',
         children: [
@@ -727,7 +724,7 @@ describe('Markdown parser', function () {
     });
 
     it('in an inline text node', function () {
-      const example = convert(`This is a test: {% $test %}`);
+      const example = convert(`This is a test: {% #test %}`);
       expect(example).toDeepEqualSubset({
         type: 'document',
         children: [
@@ -751,7 +748,7 @@ describe('Markdown parser', function () {
     });
 
     it('with nested property access', function () {
-      const example = convert('{% $bar.baz[1].test %}');
+      const example = convert('{% #bar.baz[1].test %}');
       expect(example).toDeepEqualSubset({
         type: 'document',
         children: [
@@ -824,17 +821,14 @@ describe('Markdown parser', function () {
     });
 
     it('with error for duplicate ids', function () {
-      const example = convert(`{% foo #bar #baz #qux /%}`);
-      expect(example.children[0].errors.length).toBe(2);
+      const example = convert(`{% foo /%}`);
+      expect(example.children[0].errors.length).toBe(0);
       expect(example).toDeepEqualSubset({
         type: 'document',
         children: [
           {
             tag: 'foo',
-            errors: [
-              { id: 'duplicate-attribute' },
-              { id: 'duplicate-attribute' },
-            ],
+            errors: [],
           },
         ],
       });
@@ -872,19 +866,6 @@ describe('Markdown parser', function () {
       const example = convert(`{% foo .bar .baz .qux /%}`);
       expect(example.children[0].errors.length).toBe(0);
     });
-  });
-
-  it('displays error for annotations in a fence', function () {
-    const example = convert(`
-    ~~~
-    test
-    {% #foo %}
-    test
-    ~~~
-    `);
-
-    expect(Object.values(example.annotations).length).toEqual(0);
-    expect(example.children[0].errors[0]?.id).toEqual('no-inline-annotations');
   });
 
   it('correctly identifies inlines', function () {

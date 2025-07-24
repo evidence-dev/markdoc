@@ -45,7 +45,7 @@ describe('MarkdownIt Annotations plugin', function () {
 
     it('with an ID and class', function () {
       const example = parse(`
-      {% test #foo .bar %}
+      {% test .bar %}
       This is a test
       {% /test %}`);
 
@@ -55,7 +55,6 @@ describe('MarkdownIt Annotations plugin', function () {
           meta: {
             tag: 'test',
             attributes: [
-              { type: 'attribute', name: 'id', value: 'foo' },
               { type: 'class', name: 'bar', value: true },
             ],
           },
@@ -85,7 +84,7 @@ describe('MarkdownIt Annotations plugin', function () {
     it('with a self-closing container with annotations', function () {
       const example = parse(`
       This is a test
-      {% test #foo .bar baz=1 /%}
+      {% test .bar baz=1 /%}
       This is another test
       `);
 
@@ -98,7 +97,6 @@ describe('MarkdownIt Annotations plugin', function () {
           meta: {
             tag: 'test',
             attributes: [
-              { type: 'attribute', name: 'id', value: 'foo' },
               { type: 'class', name: 'bar', value: true },
               { type: 'attribute', name: 'baz', value: 1 },
             ],
@@ -117,7 +115,6 @@ describe('MarkdownIt Annotations plugin', function () {
           nesting: 1,
           meta: {
             attributes: [
-              { type: 'attribute', name: 'id', value: 'foo' },
               { type: 'class', name: 'bar', value: true },
               { type: 'attribute', name: 'baz', value: 1 },
             ],
@@ -136,7 +133,7 @@ describe('MarkdownIt Annotations plugin', function () {
 
       it('basic', function () {
         const example = parse(`
-        {% test #foo .bar
+        {% test .bar
           baz=1 %}
         This is a test
         {% /test %}
@@ -153,7 +150,7 @@ describe('MarkdownIt Annotations plugin', function () {
       it('basic with symbols on separate lines', function () {
         const example = parse(`
         {%
-          test #foo .bar
+          test .bar
           baz=1
         %}
         This is a test
@@ -366,7 +363,7 @@ describe('MarkdownIt Annotations plugin', function () {
 
   describe('parsing inline annotations', function () {
     it('with a header', function () {
-      const example = parse('# This is a test {% #foo .bar .baz %}');
+      const example = parse('# This is a test {% .bar .baz %}');
       expect(example).toDeepEqualSubset([
         { type: 'heading_open' },
         {
@@ -378,7 +375,6 @@ describe('MarkdownIt Annotations plugin', function () {
               meta: {
                 tag: undefined,
                 attributes: [
-                  { type: 'attribute', name: 'id', value: 'foo' },
                   { type: 'class', name: 'bar', value: true },
                   { type: 'class', name: 'baz', value: true },
                 ],
@@ -391,7 +387,7 @@ describe('MarkdownIt Annotations plugin', function () {
     });
 
     it('with a header and keys', function () {
-      const example = parse('# This is a test {% #foo .bar .baz foo=2 %}');
+      const example = parse('# This is a test {% .bar .baz foo=2 %}');
       expect(example).toDeepEqualSubset([
         { type: 'heading_open' },
         {
@@ -403,7 +399,6 @@ describe('MarkdownIt Annotations plugin', function () {
               meta: {
                 tag: undefined,
                 attributes: [
-                  { type: 'attribute', name: 'id', value: 'foo' },
                   { type: 'class', name: 'bar', value: true },
                   { type: 'class', name: 'baz', value: true },
                   { type: 'attribute', name: 'foo', value: 2 },

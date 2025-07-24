@@ -186,7 +186,7 @@
     variables:
       foo: 10
   code: |
-    This is a test: {% $foo %}
+    This is a test: {% #foo %}
   expected:
     - tag: p
       children:
@@ -242,14 +242,14 @@
     variables:
       foo: false
   code: |
-    {% if $foo %}
+    {% if #foo %}
     This is a test
     {% /if %}
   expected: []
 
 - name: Simple conditional with non-existent variable
   code: |
-    {% if $foo %}
+    {% if #foo %}
     This is a test
     {% /if %}
   expected: []
@@ -259,7 +259,7 @@
     variables:
       foo: false
   code: |
-    {% if $foo %}
+    {% if #foo %}
     Condition is true
     {% else /%}
     Condition is false
@@ -275,9 +275,9 @@
       foo: false
       bar: false
   code: |
-    {% if $foo %}
+    {% if #foo %}
     Condition foo is true
-    {% else $bar /%}
+    {% else #bar /%}
     Condition bar is true
     {% else /%}
     No condition is true
@@ -292,7 +292,7 @@
     variables:
       foo: test
   code: |
-    {% if equals($foo, "test") %}
+    {% if equals(#foo, "test") %}
     test
     {% /if %}
   expected:
@@ -305,7 +305,7 @@
       foo: test
       bar: true
   code: |
-    {% if and(equals($foo, "test"), $bar) %}
+    {% if and(equals(#foo, "test"), #bar) %}
     test
     {% /if %}
   expected:
@@ -318,7 +318,7 @@
       foo: test
       bar: true
   code: |
-    {% if or(equals($foo, "wrong"), $bar) %}
+    {% if or(equals(#foo, "wrong"), #bar) %}
     test
     {% /if %}
   expected:
@@ -330,7 +330,7 @@
     variables:
       foo: test
   code: |
-    {% if equals($foo, "wrong") %}
+    {% if equals(#foo, "wrong") %}
     test
     {% /if %}
   expected: []
@@ -341,14 +341,14 @@
       foo: test
       bar: true
   code: |
-    {% if and(equals($foo, "wrong"), $bar) %}
+    {% if and(equals(#foo, "wrong"), #bar) %}
     test
     {% /if %}
   expected: []
 
 - name: Conditional with equals and an undefined variable
   code: |
-    {% if equals($foo.bar, "test") %}
+    {% if equals(#foo.bar, "test") %}
     test
     {% /if %}
   expected: []
@@ -358,7 +358,7 @@
     variables:
       foo: true
   code: |
-    {% if not($foo) %}
+      {% if not(#foo) %}
     Conditions are met
     {% /if %}
   expected: []
@@ -368,7 +368,7 @@
     variables:
       foo: false
   code: |
-    {% if not($foo) %}
+    {% if not(#foo) %}
     Conditions are met
     {% /if %}
   expected:
@@ -383,7 +383,7 @@
       bar: false
       baz: true
   code: |
-    {% if not(and($baz, or($foo, $bar))) %}
+    {% if not(and(#baz, or(#foo, #bar))) %}
     Conditions are met
     {% /if %}
   expected: []
@@ -395,7 +395,7 @@
       bar: false
       baz: false
   code: |
-    {% if not(and($baz, or($foo, $bar))) %}
+    {% if not(and(#baz, or(#foo, #bar))) %}
     Conditions are met
     {% /if %}
   expected:
@@ -409,7 +409,7 @@
       foo: true
       bar: true
   code: |
-    {% if and($foo, $bar) %}
+    {% if and(#foo, #bar) %}
     Conditions are met
     {% /if %}
   expected:
@@ -419,7 +419,7 @@
 
 - name: Using the default function
   code: |
-    {% if default($foo, true) %}
+    {% if default(#foo, true) %}
     Conditions are met
     {% /if %}
   expected:
@@ -508,8 +508,8 @@
   code: |
     ```javascript {% process=true %}
     testing
-    {% if $baz %}
-    console.log('This is a test: {% $foo %}');
+    {% if #baz %}
+    console.log('This is a test: {% #foo %}');
     {% /if %}
     test
     ```
@@ -533,8 +533,8 @@
     ```javascript
     function test() {
       testing();
-      {% if $baz %}
-      console.log('This is a test: {% $foo %}');
+      {% if #baz %}
+      console.log('This is a test: {% #foo %}');
       {% /if %}
       return;
     }
@@ -558,8 +558,8 @@
   code: |
     ```javascript {% process=true %}
     testing
-    {% if $baz %}
-    console.log('This is a test: {% $foo %}');
+    {% if #baz %}
+    console.log('This is a test: {% #foo %}');
     {% /if %}
     test
     ```
@@ -618,7 +618,7 @@
       baz: true
   code: |
     ```javascript {% process=true %}
-    testing {% $foo %} test{% if $baz %}example{% /if %} another test
+    testing {% #foo %} test{% if #baz %}example{% /if %} another test
     ```
   expected:
     - tag: pre
@@ -664,7 +664,7 @@
       baz: true
   code: |
     ```javascript {% process=true %}
-    var stripe = Stripe('{% token %}{% $foo %}{% /token %}');
+    var stripe = Stripe('{% token %}{% #foo %}{% /token %}');
     ```
   expected:
     - tag: pre
@@ -693,7 +693,7 @@
       foo:
         this is a test: bar
   code: |
-    this is a test: {% $foo["this is a test"] %}
+    this is a test: {% #foo["this is a test"] %}
   expected:
     - tag: p
       children:
@@ -791,13 +791,13 @@
     * Test 1 - 2
     * Test 1 - 3
     ---
-    {% if $foo %}
+    {% if #foo %}
     * Test 2 - 1
     * Test 2 - 2
     * Test 2 - 3
     {% /if %}
     ---
-    {% if $bar %}
+    {% if #bar %}
     * Test 3 - 1
     * Test 3 - 2
     * Test 3 - 3
@@ -837,7 +837,7 @@
     * Test 1 - 2
     * Test 1 - 3
     ---
-    {% if $foo %}
+    {% if #foo %}
     * Test 2 - 1
     * Test 2 - 2
     * Test 2 - 3
@@ -902,7 +902,7 @@
     * Test 1 - 2
     * Test 1 - 3
     ---
-    {% if $foo %}
+    {% if #foo %}
     * Test 2 - 1
     * Test 2 - 2
     * Test 2 - 3
@@ -912,7 +912,7 @@
     * Test 2 - 3 - alternate
     {% /if %}
     ---
-    {% if $bar %}
+    {% if #bar %}
     * Test 3 - 1
     * Test 3 - 2
     * Test 3 - 3
@@ -1290,7 +1290,7 @@
             render: true
     partials:
       foo.md: |
-        {% example bar=$foo %}
+        {% example bar=#foo %}
         This is a partial with a variable
         {% /example %}
   code: |
@@ -1319,15 +1319,15 @@
   code: |
     This is a test
 
-    {% if $foo %}
+    {% if #foo %}
     Nope
     {% /if %}
 
-    {% if $bar %}
+    {% if #bar %}
     Nope
     {% /if %}
 
-    {% if $baz %}
+    {% if #baz %}
     Nope
     {% /if %}
 
@@ -1335,7 +1335,7 @@
     Nope
     {% /if %}
 
-    {% if and($foo, $bar) %}
+    {% if and(#foo, #bar) %}
     Nope
     {% /if %}
   expected:
@@ -1349,23 +1349,23 @@
       bar: ''
       baz: true
   code: |
-    {% if $foo %}
+    {% if foo %}
     foo
     {% /if %}
 
-    {% if $bar %}
+    {% if #bar %}
     bar
     {% /if %}
 
-    {% if $baz %}
+    {% if #baz %}
     baz
     {% /if %}
 
-    {% if or(false, $foo) %}
+    {% if or(false, #foo) %}
     zero
     {% /if %}
 
-    {% if and($foo, $bar, $baz) %}
+    {% if and(#foo, #bar, #baz) %}
     and
     {% /if %}
   expected:
@@ -1858,7 +1858,7 @@
   code: |
     {% foo %}
       {% slot "bar" %}
-      This is a {% $example %}
+      This is a {% #example %}
       {% /slot %}
     {% /foo %}
   slots: true

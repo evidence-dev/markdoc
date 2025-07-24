@@ -10,7 +10,7 @@ title: What is Markdoc?
 
 ---
 
-# {% $markdoc.frontmatter.title %} {% #overview %}
+# {% #markdoc.frontmatter.title %} {% #overview %}
 
 Markdoc is a **Markdown**-based \`syntax\` and _toolchain_ for creating ~~custom~~ documentation sites. Stripe created Markdoc to power [our public docs](http://stripe.com/docs).
 
@@ -21,11 +21,11 @@ Markdoc is a **Markdown**-based \`syntax\` and _toolchain_ for creating ~~custom
 [Link](/href   "title")
     ![Alt](/image   "title")
 
-{% callout #id   .class  .class2   a="check" b={"e"={"with space"=5}} c=8 d=[1,    "2",true,  null] %}
+{% callout .class  .class2   a="check" b={"e"={"with space"=5}} c=8 d=[1,    "2",true,  null] %}
 Markdoc is open-source—check out it's [source](http://github.com/markdoc/markdoc) to see how it works.
 {% /callout %}
 
-\`\`\`js {% .class #id x="test"   render=false %}
+\`\`\`js {% .class x="test"   render=false %}
 Code!
 \`\`\`
 
@@ -43,7 +43,7 @@ const expected = `---
 title: What is Markdoc?
 ---
 
-# {% $markdoc.frontmatter.title %} {% #overview %}
+# {% #markdoc.frontmatter.title %} {% #overview %}
 
 Markdoc is a **Markdown**-based \`syntax\` and _toolchain_ for creating ~~custom~~ documentation sites. Stripe created Markdoc to power [our public docs](http://stripe.com/docs).
 
@@ -55,7 +55,6 @@ Markdoc is a **Markdown**-based \`syntax\` and _toolchain_ for creating ~~custom
 ![Alt](/image "title")
 
 {% callout
-   #id
    .class
    .class2
    a="check"
@@ -65,7 +64,7 @@ Markdoc is a **Markdown**-based \`syntax\` and _toolchain_ for creating ~~custom
 Markdoc is open-source—check out it's [source](http://github.com/markdoc/markdoc) to see how it works.
 {% /callout %}
 
-\`\`\`js {% .class #id x="test" render=false %}
+\`\`\`js {% .class x="test" render=false %}
 Code!
 \`\`\`
 
@@ -197,9 +196,9 @@ paragraph 2
   });
 
   it('complex attributes', () => {
-    const source = `{% if $gates["<string_key>"].test["@var"] id="id with space" class="class with space" /%}`;
+    const source = `{% if #gates["<string_key>"].test["@var"] id="id with space" class="class with space" /%}`;
     const expected = `{% if
-   $gates["<string_key>"].test["@var"]
+   #gates["<string_key>"].test["@var"]
    id="id with space"
    class="class with space" /%}
 `;
@@ -207,9 +206,9 @@ paragraph 2
   });
 
   it('attribute edge cases', () => {
-    const source = `{% key id=$user.name class=default($y, "test") %}Child{% /key %}`;
+    const source = `{% key id=#user.name class=default(#y, "test") %}Child{% /key %}`;
     const expected = `
-{% key id=$user.name class=default($y, "test") %}Child{% /key %}
+{% key id=#user.name class=default(#y, "test") %}Child{% /key %}
 `;
 
     check(source, expected);
@@ -219,22 +218,22 @@ paragraph 2
   it('variables', () => {
     const source = `
 {% tag "complex primary" /%}
-{% if $primary %}
+{% if #primary %}
 X
 {% /if %}
-{% $user.name %}
-{% key x=$user.name y=$flag z=$array[5] /%}
+{% #user.name %}
+{% key x=#user.name y=#flag z=#array[5] /%}
 `;
     const expected = `
 {% tag "complex primary" /%}
 
-{% if $primary %}
+{% if #primary %}
 X
 {% /if %}
 
-{% $user.name %}
+{% #user.name %}
 
-{% key x=$user.name y=$flag z=$array[5] /%}
+{% key x=#user.name y=#flag z=#array[5] /%}
 `;
 
     check(source, expected);
@@ -244,10 +243,10 @@ X
   it('functions', () => {
     const source = `
 {% markdoc("test", 1) %}
-{% key x=default($x, 1) /%}
+{% key x=default(#x, 1) /%}
 `;
     const expected = `{% markdoc("test", 1) %}
-{% key x=default($x, 1) /%}
+{% key x=default(#x, 1) /%}
 `;
 
     check(source, expected);
@@ -476,7 +475,7 @@ Yes!
   {% /tag %} 
 
   \`\`\`
-  {% $code %}
+  {% #code %}
   \`\`\`
 - Two
 
@@ -504,7 +503,7 @@ Yes!
   {% /tag %}
 
   \`\`\`
-  {% $code %}
+  {% #code %}
   \`\`\`
 
 - Two

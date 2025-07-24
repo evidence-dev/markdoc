@@ -373,7 +373,7 @@ describe('transform', function () {
   describe('annotations', () => {
     it('multiple values should be ordered correctly', () => {
       const example = markdoc.parse(
-        `\`\`\`js {% z=true .class y=2 x="1" #id %} \nContent\n\`\`\``
+        `\`\`\`js {% z=true .class y=2 x="1" %} \nContent\n\`\`\``
       );
 
       const fence = example.children[0];
@@ -383,8 +383,7 @@ describe('transform', function () {
       expect(attributes).toEqual({
         content: 'Content\n',
         language: 'js',
-        id: 'id',
-        meta: '{% z=true .class y=2 x="1" #id %} ',
+        meta: '{% z=true .class y=2 x="1" %} ',
         class: { class: true },
         z: true,
         y: 2,
@@ -394,8 +393,7 @@ describe('transform', function () {
         { type: 'attribute', name: 'z', value: true },
         { type: 'class', name: 'class', value: true },
         { type: 'attribute', name: 'y', value: 2 },
-        { type: 'attribute', name: 'x', value: '1' },
-        { type: 'attribute', name: 'id', value: 'id' },
+        { type: 'attribute', name: 'x', value: '1' }
       ]);
     });
   });
