@@ -103,7 +103,7 @@ function* formatAnnotations(n: Node) {
 }
 
 function* formatVariable(v: Variable) {
-  yield '$';
+  yield '{{';
   yield v.path
     .map((p, i) => {
       if (i === 0) return p;
@@ -112,6 +112,7 @@ function* formatVariable(v: Variable) {
       return `["${p}"]`;
     })
     .join('');
+  yield '}}';
 }
 
 function* formatFunction(f: Function) {

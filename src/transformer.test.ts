@@ -21,7 +21,7 @@ describe('Transformer', function () {
       });
 
       it('should interpolate simple string variables', function () {
-        const node = createTestNode({ title: 'Hello $name' });
+        const node = createTestNode({ title: 'Hello {{name}}' });
         const config = createTestConfig({ name: 'World' });
         
         const result = transformer.attributes(node, config);
@@ -29,7 +29,7 @@ describe('Transformer', function () {
       });
 
       it('should interpolate number variables', function () {
-        const node = createTestNode({ title: 'Count: $count' });
+        const node = createTestNode({ title: 'Count: {{count}}' });
         const config = createTestConfig({ count: 42 });
         
         const result = transformer.attributes(node, config);
@@ -37,7 +37,7 @@ describe('Transformer', function () {
       });
 
       it('should interpolate boolean variables', function () {
-        const node = createTestNode({ title: 'Status: $enabled' });
+        const node = createTestNode({ title: 'Status: {{enabled}}' });
         const config = createTestConfig({ enabled: true });
         
         const result = transformer.attributes(node, config);
@@ -45,7 +45,7 @@ describe('Transformer', function () {
       });
 
       it('should interpolate nested object properties', function () {
-        const node = createTestNode({ title: 'Welcome to $site.name' });
+        const node = createTestNode({ title: 'Welcome to {{site.name}}' });
         const config = createTestConfig({ site: { name: 'Markdoc' } });
         
         const result = transformer.attributes(node, config);
@@ -53,7 +53,7 @@ describe('Transformer', function () {
       });
 
       it('should interpolate deep nested properties', function () {
-        const node = createTestNode({ title: 'User: $user.profile.name' });
+        const node = createTestNode({ title: 'User: {{user.profile.name}}' });
         const config = createTestConfig({ 
           user: { profile: { name: 'John' } } 
         });
@@ -63,7 +63,7 @@ describe('Transformer', function () {
       });
 
       it('should interpolate multiple variables in one string', function () {
-        const node = createTestNode({ title: '$greeting $name from $company' });
+        const node = createTestNode({ title: '{{greeting}} {{name}} from {{company}}' });
         const config = createTestConfig({ 
           greeting: 'Hello', 
           name: 'World', 
@@ -75,7 +75,7 @@ describe('Transformer', function () {
       });
 
       it('should handle mixed literal and variables', function () {
-        const node = createTestNode({ title: 'Welcome to $site.name - $version' });
+        const node = createTestNode({ title: 'Welcome to {{site.name}} - {{version}}' });
         const config = createTestConfig({ 
           site: { name: 'Markdoc' }, 
           version: '2.0' 
@@ -86,34 +86,34 @@ describe('Transformer', function () {
       });
 
       it('should keep original when variable not found', function () {
-        const node = createTestNode({ title: 'Hello $missing' });
+        const node = createTestNode({ title: 'Hello {{missing}}' });
         const config = createTestConfig({ name: 'World' });
         
         const result = transformer.attributes(node, config);
-        expect(result.title).toBe('Hello $missing');
+        expect(result.title).toBe('Hello {{missing}}');
       });
 
       it('should keep original when variables object is empty', function () {
-        const node = createTestNode({ title: 'Hello $name' });
+        const node = createTestNode({ title: 'Hello {{name}}' });
         const config = createTestConfig({});
         
         const result = transformer.attributes(node, config);
-        expect(result.title).toBe('Hello $name');
+        expect(result.title).toBe('Hello {{name}}');
       });
 
       it('should handle null and undefined values', function () {
-        const node = createTestNode({ title: 'Null: $nullVal, Undefined: $undefinedVal' });
+        const node = createTestNode({ title: 'Null: {{nullVal}}, Undefined: {{undefinedVal}}' });
         const config = createTestConfig({ 
           nullVal: null, 
           undefinedVal: undefined 
         });
         
         const result = transformer.attributes(node, config);
-        expect(result.title).toBe('Null: null, Undefined: undefined');
+        expect(result.title).toBe('Null: , Undefined: ');
       });
 
       it('should handle variables with underscores and hyphens', function () {
-        const node = createTestNode({ title: 'Hello $user_name from $company-name' });
+        const node = createTestNode({ title: 'Hello {{user_name}} from {{company-name}}' });
         const config = createTestConfig({ 
           user_name: 'John', 
           'company-name': 'Markdoc' 
@@ -124,7 +124,7 @@ describe('Transformer', function () {
       });
 
       it('should not interpolate when config.variables is undefined', function () {
-        const node = createTestNode({ title: 'Hello $name' });
+        const node = createTestNode({ title: 'Hello {{name}}' });
         const config: Config = {
           tags: {
             callout: {
@@ -137,11 +137,11 @@ describe('Transformer', function () {
         };
         
         const result = transformer.attributes(node, config);
-        expect(result.title).toBe('Hello $name');
+        expect(result.title).toBe('Hello {{name}}');
       });
 
       it('should handle complex nested paths', function () {
-        const node = createTestNode({ title: 'User: $user.profile.settings.theme' });
+        const node = createTestNode({ title: 'User: {{user.profile.settings.theme}}' });
         const config = createTestConfig({ 
           user: { 
             profile: { 
@@ -157,7 +157,7 @@ describe('Transformer', function () {
       });
 
       it('should handle partial path failures gracefully', function () {
-        const node = createTestNode({ title: 'User: $user.profile.missing.name' });
+        const node = createTestNode({ title: 'User: {{user.profile.missing.name}}' });
         const config = createTestConfig({ 
           user: { 
             profile: { 
@@ -167,11 +167,11 @@ describe('Transformer', function () {
         });
         
         const result = transformer.attributes(node, config);
-        expect(result.title).toBe('User: $user.profile.missing.name');
+        expect(result.title).toBe('User: {{user.profile.missing.name}}');
       });
 
       it('should handle interpolation without adding validation errors during transformation', function () {
-        const node = createTestNode({ title: 'Hello $missing and $user.profile.name' });
+        const node = createTestNode({ title: 'Hello {{missing}} and {{user.profile.name}}' });
         const config = createTestConfig({ 
           user: { 
             profile: { 
@@ -183,7 +183,7 @@ describe('Transformer', function () {
         const result = transformer.attributes(node, config);
         
         // Transformation should still work
-        expect(result.title).toBe('Hello $missing and John');
+        expect(result.title).toBe('Hello {{missing}} and John');
         // But no errors should be added during transformation
         expect(node.errors.length).toEqual(0);
       });

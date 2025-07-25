@@ -10,7 +10,7 @@ title: What is Markdoc?
 
 ---
 
-# {% $markdoc.frontmatter.title %} {% #overview %}
+# {% {{markdoc.frontmatter.title}} %} {% #overview %}
 
 Markdoc is a **Markdown**-based \`syntax\` and _toolchain_ for creating ~~custom~~ documentation sites. Stripe created Markdoc to power [our public docs](http://stripe.com/docs).
 
@@ -43,7 +43,7 @@ const expected = `---
 title: What is Markdoc?
 ---
 
-# {% $markdoc.frontmatter.title %} {% #overview %}
+# {% {{markdoc.frontmatter.title}} %} {% #overview %}
 
 Markdoc is a **Markdown**-based \`syntax\` and _toolchain_ for creating ~~custom~~ documentation sites. Stripe created Markdoc to power [our public docs](http://stripe.com/docs).
 
@@ -197,9 +197,9 @@ paragraph 2
   });
 
   it('complex attributes', () => {
-    const source = `{% if $gates["<string_key>"].test["@var"] id="id with space" class="class with space" /%}`;
+    const source = `{% if {{gates["<string_key>"].test["@var"]}} id="id with space" class="class with space" /%}`;
     const expected = `{% if
-   $gates["<string_key>"].test["@var"]
+   {{gates["<string_key>"].test["@var"]}}
    id="id with space"
    class="class with space" /%}
 `;
@@ -207,9 +207,9 @@ paragraph 2
   });
 
   it('attribute edge cases', () => {
-    const source = `{% key id=$user.name class=default($y, "test") %}Child{% /key %}`;
+    const source = `{% key id={{user.name}} class=default({{y}}, "test") %}Child{% /key %}`;
     const expected = `
-{% key id=$user.name class=default($y, "test") %}Child{% /key %}
+{% key id={{user.name}} class=default({{y}}, "test") %}Child{% /key %}
 `;
 
     check(source, expected);
@@ -219,22 +219,22 @@ paragraph 2
   it('variables', () => {
     const source = `
 {% tag "complex primary" /%}
-{% if $primary %}
+{% if {{primary}} %}
 X
 {% /if %}
-{% $user.name %}
-{% key x=$user.name y=$flag z=$array[5] /%}
+{% {{user.name}} %}
+{% key x={{user.name}} y={{flag}} z={{array[5]}} /%}
 `;
     const expected = `
 {% tag "complex primary" /%}
 
-{% if $primary %}
+{% if {{primary}} %}
 X
 {% /if %}
 
-{% $user.name %}
+{% {{user.name}} %}
 
-{% key x=$user.name y=$flag z=$array[5] /%}
+{% key x={{user.name}} y={{flag}} z={{array[5]}} /%}
 `;
 
     check(source, expected);
@@ -244,10 +244,10 @@ X
   it('functions', () => {
     const source = `
 {% markdoc("test", 1) %}
-{% key x=default($x, 1) /%}
+{% key x=default({{x}}, 1) /%}
 `;
     const expected = `{% markdoc("test", 1) %}
-{% key x=default($x, 1) /%}
+{% key x=default({{x}}, 1) /%}
 `;
 
     check(source, expected);
@@ -476,7 +476,7 @@ Yes!
   {% /tag %} 
 
   \`\`\`
-  {% $code %}
+  {% {{code}} %}
   \`\`\`
 - Two
 
@@ -504,7 +504,7 @@ Yes!
   {% /tag %}
 
   \`\`\`
-  {% $code %}
+  {% {{code}} %}
   \`\`\`
 
 - Two

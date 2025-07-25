@@ -46,18 +46,18 @@ function interpolateWithPattern(value: string, pattern: RegExp, variables?: Reco
       }
     }
     
-    return String(variableValue);
+    return variableValue === null || variableValue === undefined ? '' : String(variableValue);
   });
   
   return { result, undefinedVariables };
 }
 
 export function interpolateString(value: string, variables?: Record<string, any>): InterpolationResult {
-  return interpolateWithPattern(value, /\$([a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*)/g, variables);
+  return interpolateWithPattern(value, /\{\{\s*([a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*)\s*\}\}/g, variables);
 }
 
 export function interpolateFence(value: string, variables?: Record<string, any>): InterpolationResult {
-  return interpolateWithPattern(value, /\{\{\s*\$([a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*)\s*\}\}/g, variables);
+  return interpolateWithPattern(value, /\{\{\s*([a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*)\s*\}\}/g, variables);
 }
 
 export function findTagEnd(content: string, start = 0) {

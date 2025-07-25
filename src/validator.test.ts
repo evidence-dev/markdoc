@@ -563,14 +563,14 @@ bar
 
   describe('variable validation', () => {
     it('should only validate if the variables config is passed', () => {
-      const example = `{% $valid.variable %}`;
+      const example = `{% {{valid.variable}} %}`;
       const output = validate(example, {});
 
       expect(output).toEqual([]);
     });
 
     it('should warn against missing variables', () => {
-      const example = `{% $undefinedVariable %}`;
+      const example = `{% {{undefinedVariable}} %}`;
       const output = validate(example, { variables: {} });
 
       expect(output).toDeepEqualSubset([
@@ -586,7 +586,7 @@ bar
     });
 
     it('should not warn if variable exists', () => {
-      const example = `{% $valid.variable %}`;
+      const example = `{% {{valid.variable}} %}`;
       const output = validate(example, {
         variables: { valid: { variable: false } },
       });

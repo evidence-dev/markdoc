@@ -98,11 +98,7 @@ FunctionParameterTail =
 TrailingComma = (_*',')?
 
 Variable 'variable' =
-  prefix:[$@]
-  head:Identifier
-  tail:VariableTail* {
-    if (prefix === '@')
-      return [head, ...tail];
+  '{{' _* head:Identifier tail:VariableTail* _* '}}' {
     return new Variable([head, ...tail]);
   }
 

@@ -704,7 +704,7 @@ describe('Markdown parser', function () {
 
   describe('handling variables', function () {
     it('by itself on a line', function () {
-      const example = convert(`{% $test %}`);
+      const example = convert(`{% {{test}} %}`);
       expect(example).toDeepEqualSubset({
         type: 'document',
         children: [
@@ -727,7 +727,7 @@ describe('Markdown parser', function () {
     });
 
     it('in an inline text node', function () {
-      const example = convert(`This is a test: {% $test %}`);
+      const example = convert(`This is a test: {% {{test}} %}`);
       expect(example).toDeepEqualSubset({
         type: 'document',
         children: [
@@ -751,7 +751,7 @@ describe('Markdown parser', function () {
     });
 
     it('with nested property access', function () {
-      const example = convert('{% $bar.baz[1].test %}');
+      const example = convert('{% {{bar.baz[1].test}} %}');
       expect(example).toDeepEqualSubset({
         type: 'document',
         children: [
