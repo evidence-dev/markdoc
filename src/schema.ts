@@ -1,6 +1,6 @@
 import type { Schema } from './types';
 import Tag from './tag';
-import { interpolateFence } from './utils';
+import { interpolateString } from './utils';
 
 export const document: Schema = {
   render: 'article',
@@ -65,13 +65,13 @@ export const fence: Schema = {
     if (node.children.length) {
       children = node.transformChildren(config).map(child => {
         if (typeof child === 'string') {
-          const interpolation = interpolateFence(child, config.variables);
+          const interpolation = interpolateString(child, config.variables);
           return interpolation.result;
         }
         return child;
       });
     } else {
-      const interpolation = interpolateFence(node.attributes.content, config.variables);
+      const interpolation = interpolateString(node.attributes.content, config.variables);
       children = [interpolation.result];
     }
 

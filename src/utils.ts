@@ -28,10 +28,10 @@ export interface InterpolationResult {
   undefinedVariables: string[];
 }
 
-function interpolateWithPattern(value: string, pattern: RegExp, variables?: Record<string, any>): InterpolationResult {
+export function interpolateString(value: string, variables?: Record<string, any>): InterpolationResult {
   const undefinedVariables: string[] = [];
   
-  const result = value.replace(pattern, (match, path) => {
+  const result = value.replace(/\{\{\s*([a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*)\s*\}\}/g, (match, path) => {
     if (!variables) return match;
     
     const pathParts = path.split('.');
@@ -50,14 +50,6 @@ function interpolateWithPattern(value: string, pattern: RegExp, variables?: Reco
   });
   
   return { result, undefinedVariables };
-}
-
-export function interpolateString(value: string, variables?: Record<string, any>): InterpolationResult {
-  return interpolateWithPattern(value, /\{\{\s*([a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*)\s*\}\}/g, variables);
-}
-
-export function interpolateFence(value: string, variables?: Record<string, any>): InterpolationResult {
-  return interpolateWithPattern(value, /\{\{\s*([a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*)\s*\}\}/g, variables);
 }
 
 export function findTagEnd(content: string, start = 0) {

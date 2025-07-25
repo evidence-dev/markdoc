@@ -1,4 +1,4 @@
-import { findTagEnd, parseTags, interpolateFence } from '../src/utils';
+import { findTagEnd, parseTags, interpolateString } from '../src/utils';
 
 describe('Templating', function () {
   describe('parseTags', function () {
@@ -184,17 +184,17 @@ describe('Templating', function () {
     });
   });
 
-  describe('interpolateFence', function () {
+  describe('interpolateString', function () {
     it('should interpolate a simple variable', function () {
       const example = 'foo {{ bar }}';
-      const output = interpolateFence(example, { bar: 'test' });
+      const output = interpolateString(example, { bar: 'test' });
       expect(output.result).toEqual('foo test');
       expect(output.undefinedVariables).toEqual([]);
     });
 
     it('should interpolate a variable with a dot', function () {
       const example = 'foo {{ bar.baz }}';
-      const output = interpolateFence(example, { bar: { baz: 'test' } });
+      const output = interpolateString(example, { bar: { baz: 'test' } });
       expect(output.result).toEqual('foo test');
       expect(output.undefinedVariables).toEqual([]);
     });
