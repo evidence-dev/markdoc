@@ -1,4 +1,4 @@
-import { findTagEnd, interpolateString, parseTags } from '../src/utils';
+import { findTagEnd, interpolateString, interpolateValue, parseTags } from '../src/utils';
 
 describe('Templating', function () {
   describe('parseTags', function () {
@@ -421,6 +421,112 @@ describe('Templating', function () {
       });
       expect(output.result).toEqual('Hello {{ name }} World John {{ user.name }}');
       expect(output.undefinedVariables).toEqual([]);
+    });
+  });
+
+  describe('interpolateValue', function () {
+    it('should interpolate string values', function () {
+      const value = 'Hello {{$name}}';
+      const variables = { name: 'World' };
+      const result = interpolateValue(value, variables);
+      expect(result).toEqual('Hello World');
+    });
+
+    it('should interpolate array values', function () {
+      const value = ['Hello {{$name}}', '{{$greeting}}', '{{$site.name}}'];
+      const variables = { 
+        name: 'World', 
+        greeting: 'Hi', 
+        site: { name: 'Markdoc' } 
+      };
+      const result = interpolateValue(value, variables);
+      expect(result).toEqual(['Hello World', 'Hi', 'Markdoc']);
+    });
+
+    it('should interpolate object values', function () {
+      const value = {
+        title: 'Hello {{$name}}',
+        metadata: {
+          author: '{{$author}}',
+          site: '{{$site.name}}'
+        }
+      };
+      const variables = { 
+        name: 'World', 
+        author: 'John Doe', 
+        site: { name: 'Markdoc' } 
+      };
+      const result = interpolateValue(value, variables);
+      expect(result).toEqual({
+        title: 'Hello World',
+        metadata: {
+          author: 'John Doe',
+          site: 'Markdoc'
+        }
+      });
+    });
+
+    it('should handle nested arrays and objects', function () {
+      const value = {
+        items: [
+          { name: '{{$item1}}', value: '{{$val1}}' },
+          { name: '{{$item2}}', value: '{{$val2}}' }
+        ],
+        summary: '{{$total}} items'
+      };
+      const variables = { 
+        item1: 'First', 
+        val1: '1', 
+        item2: 'Second', 
+        val2: '2', 
+        total: '2' 
+      };
+      const result = interpolateValue(value, variables);
+      expect(result).toEqual({
+        items: [
+          { name: 'First', value: '1' },
+          { name: 'Second', value: '2' }
+        ],
+        summary: '2 items'
+      });
+    });
+
+    it('should handle non-string values unchanged', function () {
+      const value = {
+        number: 42,
+        boolean: true,
+        null: null,
+        array: [1, 2, 3],
+        nested: { key: 'value' }
+      };
+      const variables = { name: 'World' };
+      const result = interpolateValue(value, variables);
+      expect(result).toEqual(value);
+    });
+
+    it('should handle undefined variables gracefully', function () {
+      const value = {
+        title: 'Hello {{$name}}',
+        missing: '{{$undefined}}'
+      };
+      const variables = { name: 'World' };
+      const result = interpolateValue(value, variables);
+      expect(result).toEqual({
+        title: 'Hello World',
+        missing: '{{$undefined}}'
+      });
+    });
+
+    it('should handle empty variables object', function () {
+      const value = {
+        title: 'Hello {{$name}}',
+        items: ['{{$item1}}', '{{$item2}}']
+      };
+      const result = interpolateValue(value, {});
+      expect(result).toEqual({
+        title: 'Hello {{$name}}',
+        items: ['{{$item1}}', '{{$item2}}']
+      });
     });
   });
 });

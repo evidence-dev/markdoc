@@ -951,6 +951,73 @@
         foo: "Hello {{$name}}"
 
 
+- name: Object values with interpolation are supported
+  config:
+    variables:
+      name: "World"
+      site: { name: "Markdoc" }
+      author: "John Doe"
+    tags:
+      test:
+        render: test
+        attributes:
+          metadata:
+            type: Object
+            render: true
+  code: |
+    {% test metadata={title="Hello {{$name}}" author="{{$author}}" site="{{$site.name}}"} /%}
+  expected:
+    - tag: test
+      attributes:
+        metadata: {title: "Hello World", author: "John Doe", site: "Markdoc"}
+
+- name: Array values with interpolation are supported
+  config:
+    variables:
+      name: "World"
+      site: { name: "Markdoc" }
+      author: "John Doe"
+    tags:
+      test:
+        render: test
+        attributes:
+          items:
+            type: Array
+            render: true
+  code: |
+    {% test items=["Hello {{$name}}", "{{$author}}", "{{$site.name}}"] /%}
+  expected:
+    - tag: test
+      attributes:
+        items: ["Hello World", "John Doe", "Markdoc"]
+
+- name: Simple nested object interpolation test
+  config:
+    variables:
+      name: "John"
+      theme: "dark"
+      site: "Markdoc"
+    tags:
+      test:
+        render: test
+        attributes:
+          config:
+            type: Object
+            render: true
+          summary:
+            type: String
+            render: true
+  code: |
+    {% test config={user={name="{{$name}} Doe" theme="{{$theme}}"}} summary="User {{$name}} Doe on {{$site}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        config: {
+          user: {name: "John Doe", theme: "dark"},
+        }
+        summary: "User John Doe on Markdoc"
+
+
 - name: Using a backtick in a fenced code block string attribute
   config:
     nodes:

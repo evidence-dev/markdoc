@@ -68,6 +68,23 @@ export function interpolateString(value: string, variables?: Record<string, any>
   return { result, undefinedVariables };
 }
 
+export function interpolateValue(value: any, variables?: Record<string, any>): any {
+  if (typeof value === 'string') {
+    return interpolateString(value, variables).result;
+  }
+  if (Array.isArray(value)) {
+    return value.map(item => interpolateValue(item, variables));
+  }
+  if (value && typeof value === 'object') {
+    const result: Record<string, any> = {};
+    for (const [key, val] of Object.entries(value)) {
+      result[key] = interpolateValue(val, variables);
+    }
+    return result;
+  }
+  return value;
+}
+
 export function findTagEnd(content: string, start = 0) {
   let state = STATES.normal;
   for (let pos = start; pos < content.length; pos++) {
