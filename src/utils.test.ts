@@ -1,4 +1,4 @@
-import { findTagEnd, parseTags } from '../src/utils';
+import { findTagEnd, interpolateString, parseTags } from '../src/utils';
 
 describe('Templating', function () {
   describe('parseTags', function () {
@@ -181,6 +181,246 @@ describe('Templating', function () {
           content: '```\n{%a %b %c}\n```',
         },
       ]);
+    });
+  });
+
+  describe('interpolateString', function () {
+    it('should interpolate a simple variable', function () {
+      const example = 'foo {{$bar }}';
+      const output = interpolateString(example, { bar: 'test' });
+      expect(output.result).toEqual('foo test');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should interpolate a variable with a dot', function () {
+      const example = 'foo {{$bar.baz }}';
+      const output = interpolateString(example, { bar: { baz: 'test' } });
+      expect(output.result).toEqual('foo test');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should handle malformed interpolation syntax', function () {
+      const example = 'foo {{ $bar';
+      const output = interpolateString(example, { bar: 'test' });
+      expect(output.result).toEqual('foo {{ $bar');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should not support nested interpolation', function () {
+      const example = 'foo {{ $bar }}';
+      const output = interpolateString(example, { bar: '{{ nested }}' });
+      expect(output.result).toEqual('foo {{ nested }}');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should handle escaped interpolation', function () {
+      const example = 'foo \\{{ $bar }}';
+      const output = interpolateString(example, { bar: 'test' });
+      expect(output.result).toEqual('foo \\{{ $bar }}');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should handle unicode variable names', function () {
+      const example = 'Hello {{ $变量 }}';
+      const output = interpolateString(example, { '变量': '中文' });
+      expect(output.result).toEqual('Hello 中文');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should not support array access', function () {
+      const example = 'foo {{ $arr[0] }}';
+      const output = interpolateString(example, { arr: ['a', 'b', 'c'] });
+      expect(output.result).toEqual('foo {{ $arr[0] }}');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should handle object with toString method', function () {
+      const example = 'Object: {{ $obj }}';
+      const output = interpolateString(example, { 
+        obj: { toString: () => 'custom object' } 
+      });
+      expect(output.result).toEqual('Object: custom object');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should handle null and undefined values', function () {
+      const example = 'Null: {{ $nullVal }}, Undefined: {{ $undefinedVal }}, Empty: {{ $emptyStr }}';
+      const output = interpolateString(example, { 
+        nullVal: null, 
+        undefinedVal: undefined, 
+        emptyStr: '' 
+      });
+      expect(output.result).toEqual('Null: , Undefined: , Empty: ');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should handle very deep nesting', function () {
+      const example = '{{ $level1.level2.level3.level4.level5 }}';
+      const output = interpolateString(example, { 
+        level1: { 
+          level2: { 
+            level3: { 
+              level4: { 
+                level5: 'deep' 
+              } 
+            } 
+          } 
+        } 
+      });
+      expect(output.result).toEqual('deep');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should handle partial path failure', function () {
+      const example = '{{ $level1.level2.level3.level4 }}';
+      const output = interpolateString(example, { 
+        level1: { 
+          level2: { 
+            level3: 'exists' 
+          } 
+        } 
+      });
+      expect(output.result).toEqual('{{ $level1.level2.level3.level4 }}');
+      expect(output.undefinedVariables).toEqual(['level1.level2.level3.level4']);
+    });
+
+    it('should handle empty interpolation', function () {
+      const example = 'foo {{$}}';
+      const output = interpolateString(example, { foo: 'test' });
+      expect(output.result).toEqual('foo {{$}}');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should handle whitespace only in interpolation', function () {
+      const example = 'foo {{$   }}';
+      const output = interpolateString(example, { foo: 'test' });
+      expect(output.result).toEqual('foo {{$   }}');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should handle special characters in variable names', function () {
+      const example = '{{ $user-name }} {{ $user_name }} {{ $user123 }}';
+      const output = interpolateString(example, { 
+        'user-name': 'john',
+        'user_name': 'jane',
+        'user123': 'test'
+      });
+      expect(output.result).toEqual('john jane test');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should handle very long variable names', function () {
+      const example = '{{ $very_long_variable_name_that_exceeds_normal_length_limits }}';
+      const output = interpolateString(example, { 
+        'very_long_variable_name_that_exceeds_normal_length_limits': 'long' 
+      });
+      expect(output.result).toEqual('long');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should not support numbers as variable names', function () {
+      const example = '{{ $123 }}';
+      const output = interpolateString(example, { '123': 'number' });
+      expect(output.result).toEqual('{{ $123 }}');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should handle boolean values', function () {
+      const example = 'True: {{ $trueVal }}, False: {{ $falseVal }}';
+      const output = interpolateString(example, { 
+        trueVal: true, 
+        falseVal: false 
+      });
+      expect(output.result).toEqual('True: true, False: false');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should handle number values', function () {
+      const example = 'Int: {{ $intVal }}, Float: {{ $floatVal }}, Zero: {{ $zeroVal }}, Neg: {{ $negVal }}';
+      const output = interpolateString(example, { 
+        intVal: 42, 
+        floatVal: 3.14, 
+        zeroVal: 0, 
+        negVal: -1 
+      });
+      expect(output.result).toEqual('Int: 42, Float: 3.14, Zero: 0, Neg: -1');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should handle multiple interpolations in one string', function () {
+      const example = '{{ $a }} {{ $b }} {{ $c }}';
+      const output = interpolateString(example, { 
+        a: 'first', 
+        b: 'second', 
+        c: 'third' 
+      });
+      expect(output.result).toEqual('first second third');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should handle interpolation at string boundaries', function () {
+      const example = '{{ $start }}middle{{ $end }}';
+      const output = interpolateString(example, { 
+        start: 'begin', 
+        end: 'finish' 
+      });
+      expect(output.result).toEqual('beginmiddlefinish');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should handle empty variables object', function () {
+      const example = 'Hello {{ $name }}';
+      const output = interpolateString(example, {});
+      expect(output.result).toEqual('Hello {{ $name }}');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should handle null variables object', function () {
+      const example = 'Hello {{ $name }}';
+      const output = interpolateString(example, null as any);
+      expect(output.result).toEqual('Hello {{ $name }}');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should handle undefined variables object', function () {
+      const example = 'Hello {{ $name }}';
+      const output = interpolateString(example, undefined);
+      expect(output.result).toEqual('Hello {{ $name }}');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should track undefined variables correctly', function () {
+      const example = 'Hello {{ $defined }} {{ $undefined1 }} {{ $defined2 }} {{ $undefined2 }}';
+      const output = interpolateString(example, { 
+        defined: 'exists',
+        defined2: 'also exists'
+      });
+      expect(output.result).toEqual('Hello exists {{ $undefined1 }} also exists {{ $undefined2 }}');
+      expect(output.undefinedVariables).toEqual(['undefined1', 'undefined2']);
+    });
+
+    it('should not interpolate variables without $ prefix', function () {
+      const example = 'Hello {{ name }} and {{ $name }}';
+      const output = interpolateString(example, { name: 'World' });
+      expect(output.result).toEqual('Hello {{ name }} and World');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should not interpolate nested variables without $ prefix', function () {
+      const example = 'Hello {{ user.name }} and {{ $user.name }}';
+      const output = interpolateString(example, { user: { name: 'John' } });
+      expect(output.result).toEqual('Hello {{ user.name }} and John');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should not interpolate mixed syntax', function () {
+      const example = 'Hello {{ name }} {{ $name }} {{ $user.name }} {{ user.name }}';
+      const output = interpolateString(example, { 
+        name: 'World',
+        user: { name: 'John' }
+      });
+      expect(output.result).toEqual('Hello {{ name }} World John {{ user.name }}');
+      expect(output.undefinedVariables).toEqual([]);
     });
   });
 });

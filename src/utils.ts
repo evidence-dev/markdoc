@@ -23,6 +23,51 @@ export function isPromise(a: any): a is Promise<any> {
   return a && typeof a === 'object' && typeof a.then === 'function';
 }
 
+export interface InterpolationResult {
+  result: string;
+  undefinedVariables: string[];
+}
+
+export function interpolateString(value: string, variables?: Record<string, any>): InterpolationResult {
+  const undefinedVariables: string[] = [];
+  
+  if (!variables || Object.keys(variables).length === 0) {
+    return { result: value, undefinedVariables: [] };
+  }
+  
+  // Handle escaped interpolation by replacing backslashes before processing
+  const unescapedValue = value.replace(/\\\{\{/g, '{{ESCAPED_OPEN}}');
+
+  const pattern = /\{\{\s*\$([a-zA-Z_\u0080-\uFFFF][a-zA-Z0-9_\u0080-\uFFFF-]*(\.[a-zA-Z_\u0080-\uFFFF][a-zA-Z0-9_\u0080-\uFFFF-]*)*)\s*\}\}/g;
+  
+  const result = unescapedValue.replace(pattern, (match, path) => {
+    // Skip if this is our escaped placeholder
+    if (path === 'ESCAPED_OPEN') {
+      return match;
+    }
+    
+    const pathParts = path.split('.');
+    let variableValue = variables;
+    
+    for (const part of pathParts) {
+      if (variableValue && typeof variableValue === 'object' && part in variableValue) {
+        variableValue = variableValue[part];
+      } else {
+        undefinedVariables.push(path);
+        return match;
+      }
+    }
+    
+    if (variableValue === null || variableValue === undefined) return '';
+    if (typeof variableValue === 'object' && typeof variableValue.toString === 'function' && variableValue.toString !== Object.prototype.toString) {
+      return variableValue.toString();
+    }
+    return String(variableValue);
+  }).replace(/{{ESCAPED_OPEN}}/g, '\\{{');
+  
+  return { result, undefinedVariables };
+}
+
 export function findTagEnd(content: string, start = 0) {
   let state = STATES.normal;
   for (let pos = start; pos < content.length; pos++) {
