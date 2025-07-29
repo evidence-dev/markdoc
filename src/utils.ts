@@ -38,7 +38,7 @@ export function interpolateString(value: string, variables?: Record<string, any>
   // Handle escaped interpolation by replacing backslashes before processing
   const unescapedValue = value.replace(/\\\{\{/g, '{{ESCAPED_OPEN}}');
 
-  const pattern = /\{\{\s*\$([a-zA-Z_\u0080-\uFFFF][a-zA-Z0-9_\u0080-\uFFFF]*(\.[a-zA-Z_\u0080-\uFFFF][a-zA-Z0-9_\u0080-\uFFFF]*)*)\s*\}\}/g;
+  const pattern = /\{\{\s*\$([a-zA-Z_\u0080-\uFFFF][a-zA-Z0-9_\u0080-\uFFFF]*(\.[a-zA-Z_\u0080-\uFFFF][a-zA-Z0-9_\u0080-\uFFFF]*|\[[0-9]+\])*)\s*\}\}/g;
   
   const result = unescapedValue.replace(pattern, (match, path) => {
     // Skip if this is our escaped placeholder
@@ -46,12 +46,62 @@ export function interpolateString(value: string, variables?: Record<string, any>
       return match;
     }
     
-    const pathParts = path.split('.');
+    // Parse the path to handle both dot notation and array access
+    const pathParts: string[] = [];
+    let currentPart = '';
+    let inBrackets = false;
+    let bracketContent = '';
+    
+    for (let i = 0; i < path.length; i++) {
+      const char = path[i];
+      
+      if (char === '[' && !inBrackets) {
+        if (currentPart) {
+          pathParts.push(currentPart);
+          currentPart = '';
+        }
+        inBrackets = true;
+        bracketContent = '';
+      } else if (char === ']' && inBrackets) {
+        pathParts.push(`[${bracketContent}]`);
+        inBrackets = false;
+        bracketContent = '';
+      } else if (char === '.' && !inBrackets) {
+        if (currentPart) {
+          pathParts.push(currentPart);
+          currentPart = '';
+        }
+      } else if (inBrackets) {
+        bracketContent += char;
+      } else {
+        currentPart += char;
+      }
+    }
+    
+    if (currentPart) {
+      pathParts.push(currentPart);
+    }
+    
     let variableValue = variables;
     
     for (const part of pathParts) {
-      if (variableValue && typeof variableValue === 'object' && part in variableValue) {
-        variableValue = variableValue[part];
+      if (variableValue && typeof variableValue === 'object') {
+        if (part.startsWith('[') && part.endsWith(']')) {
+          // Array access
+          const index = parseInt(part.slice(1, -1), 10);
+          if (Array.isArray(variableValue) && index >= 0 && index < variableValue.length) {
+            variableValue = variableValue[index];
+          } else {
+            undefinedVariables.push(path);
+            return match;
+          }
+        } else if (part in variableValue) {
+          // Object property access
+          variableValue = variableValue[part];
+        } else {
+          undefinedVariables.push(path);
+          return match;
+        }
       } else {
         undefinedVariables.push(path);
         return match;

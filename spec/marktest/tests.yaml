@@ -966,6 +966,41 @@
       attributes:
         foo: "Hello {{$name}}"
 
+- name: Edge case - getting a key from an array element
+  config:
+    variables:
+      arr: [{ key: 'a' }, { key: 'b' }, { key: 'c' }]
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="{{$arr[1].key}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "b"
+
+- name: Edge case - getting a deep item from a mixed array and object
+  config:
+    variables:
+      arr: [{ obj: { key: ['a', 'b', { deep: 'c' }] } }, { obj: { key: ['d', 'e', { deep: 'f' }] } }, { obj: { key: ['g', 'h', { deep: 'i' }] } }]
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="{{$arr[1].obj.key[2].deep}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "f" 
 
 - name: Object values with interpolation are supported
   config:

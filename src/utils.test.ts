@@ -227,10 +227,24 @@ describe('Templating', function () {
       expect(output.undefinedVariables).toEqual([]);
     });
 
-    it('should not support array access', function () {
+    it('should support array access', function () {
       const example = 'foo {{ $arr[0] }}';
       const output = interpolateString(example, { arr: ['a', 'b', 'c'] });
-      expect(output.result).toEqual('foo {{ $arr[0] }}');
+      expect(output.result).toEqual('foo a');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should support getting a key from an array element', function () {
+      const example = 'foo {{ $arr[1].key }}';
+      const output = interpolateString(example, { arr: [{ key: 'a' }, { key: 'b' }, { key: 'c' }] });
+      expect(output.result).toEqual('foo b');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should support getting a deep item from a mixed array and object', function () {
+      const example = 'foo {{ $arr[1].obj.key[2].deep }}';
+      const output = interpolateString(example, { arr: [{ obj: { key: ['a', 'b', { deep: 'c' }] } }, { obj: { key: ['d', 'e', { deep: 'f' }] } }, { obj: { key: ['g', 'h', { deep: 'i' }] } }] });
+      expect(output.result).toEqual('foo f');
       expect(output.undefinedVariables).toEqual([]);
     });
 
