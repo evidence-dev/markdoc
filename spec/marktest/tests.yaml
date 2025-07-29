@@ -469,6 +469,590 @@
       children:
         - "foo\n{% bar %}\n"
 
+- name: Using a variable in an attribute, not a string
+  config:
+    variables:
+      bar: { baz: test }
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo=$bar.baz /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: test
+
+- name: Using a variable in an attribute string 
+  config:
+    variables:
+      bar: { baz: test }
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="Hello {{$bar.baz}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: Hello test
+
+- name: Using a variable in an attribute string at the end of a word
+  config:
+    variables:
+      metric: sales
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="sum_{{$metric}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: sum_sales
+
+- name: Using a variable in an attribute string at the start of a word
+  config:
+    variables:
+      metric: sales
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="{{$metric}}_sum" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: sales_sum
+
+- name: Using a variable in a fenced code block
+  config:
+    variables:
+      bar: test
+  code: |
+    ```javascript
+    foo {{$bar}}
+    ```
+  expected:
+    - tag: pre
+      attributes:
+        data-language: javascript
+      children:
+        - "foo test\n"
+
+- name: Using an undefined variable in a fenced code block
+  config:
+    variables:
+      bar: test
+  validation: false
+  code: |
+    ```javascript
+    foo {{$undefinedVar}}
+    ```
+  expected:
+    - tag: pre
+      attributes:
+        data-language: javascript
+      children:
+        - "foo {{$undefinedVar}}\n"
+
+
+- name: Edge case - malformed interpolation syntax
+  config:
+    variables:
+      foo: bar
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="{{$foo" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "{{$foo"
+
+- name: Edge case - nested interpolation (should not work)
+  config:
+    variables:
+      foo: "{{$bar}}"
+      bar: baz
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="{{$foo}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "{{$bar}}"
+- name: Edge case - object with toString
+  config:
+    variables:
+      obj: "custom object"
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="Object: {{$obj}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "Object: custom object"
+
+- name: Edge case - null and undefined values
+  config:
+    variables:
+      nullVal: null
+      undefinedVal: undefined
+      emptyStr: ""
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="Null: {{$nullVal}}, Undefined: {{$undefinedVal}}, Empty: '{{$emptyStr}}'" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "Null: , Undefined: undefined, Empty: ''"
+
+- name: Edge case - very deep nesting
+  config:
+    variables:
+      level1: { level2: { level3: { level4: { level5: "deep" } } } }
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="{{$level1.level2.level3.level4.level5}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "deep"
+
+- name: Edge case - partial path failure
+  config:
+    variables:
+      level1: { level2: { level3: "exists" } }
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  validation: false
+  code: |
+    {% test foo="{{$level1.level2.level3.level4}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "{{$level1.level2.level3.level4}}"
+
+- name: Edge case - empty interpolation
+  config:
+    variables:
+      foo: bar
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="{{}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "{{}}"
+
+- name: Edge case - whitespace only in interpolation
+  config:
+    variables:
+      foo: bar
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="{{   }}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "{{   }}"
+
+- name: Edge case - special characters in variable names
+  config:
+    variables:
+      "user-name": "john"
+      "user_name": "jane"
+      "user123": "test"
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="{{$user-name}} {{$user_name}} {{$user123}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "john jane test"
+
+- name: Edge case - very long variable names
+  config:
+    variables:
+      "very_long_variable_name_that_exceeds_normal_length_limits": "long"
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="{{$very_long_variable_name_that_exceeds_normal_length_limits}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "long"
+
+- name: Edge case - numbers as variable names are allowed
+  config:
+    variables:
+      "123": "number"
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="{{$123}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "number"
+
+- name: Edge case - boolean values
+  config:
+    variables:
+      trueVal: true
+      falseVal: false
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="True: {{$trueVal}}, False: {{$falseVal}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "True: true, False: false"
+
+- name: Edge case - number values
+  config:
+    variables:
+      intVal: 42
+      floatVal: 3.14
+      zeroVal: 0
+      negVal: -1
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="Int: {{$intVal}}, Float: {{$floatVal}}, Zero: {{$zeroVal}}, Neg: {{$negVal}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "Int: 42, Float: 3.14, Zero: 0, Neg: -1"
+
+- name: Edge case - multiple interpolations in one string
+  config:
+    variables:
+      a: "first"
+      b: "second"
+      c: "third"
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="{{$a}} {{$b}} {{$c}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "first second third"
+
+- name: Edge case - interpolation at string boundaries
+  config:
+    variables:
+      start: "begin"
+      end: "finish"
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="{{$start}}middle{{$end}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "beginmiddlefinish"
+
+- name: Edge case - fenced code block with complex interpolation
+  config:
+    variables:
+      language: "javascript"
+      function: "testFunction"
+      message: "Hello World"
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    ```{{$language}}
+    function {{$function}}() {
+      console.log("{{$message}}");
+    }
+    ```
+  expected:
+    - tag: pre
+      attributes:
+        data-language: javascript
+      children:
+        - "function testFunction() {\n  console.log(\"Hello World\");\n}\n"
+
+- name: Edge case - fenced code block with undefined variables
+  config:
+    variables:
+      language: "python"
+  validation: false
+  code: |
+    ```{{$language}}
+    print("{{$undefined_var}}")
+    ```
+  expected:
+    - tag: pre
+      attributes:
+        data-language: python
+      children:
+        - "print(\"{{$undefined_var}}\")\n"
+
+- name: Edge case - empty variables object
+  config:
+    variables: {}
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  validation: false
+  code: |
+    {% test foo="Hello {{$name}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "Hello {{$name}}"
+
+- name: Edge case - variables object with null/undefined
+  config:
+    variables: null
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="Hello {{$name}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "Hello {{$name}}"
+
+- name: Edge case - variables object with undefined
+  config:
+    variables: undefined
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  validation: false
+  code: |
+    {% test foo="Hello {{$name}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "Hello {{$name}}"
+
+- name: Edge case - getting a key from an array element
+  config:
+    variables:
+      arr: [{ key: 'a' }, { key: 'b' }, { key: 'c' }]
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="{{$arr[1].key}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "b"
+
+- name: Edge case - getting a deep item from a mixed array and object
+  config:
+    variables:
+      arr: [{ obj: { key: ['a', 'b', { deep: 'c' }] } }, { obj: { key: ['d', 'e', { deep: 'f' }] } }, { obj: { key: ['g', 'h', { deep: 'i' }] } }]
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="{{$arr[1].obj.key[2].deep}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "f" 
+
+- name: Object values with interpolation are supported
+  config:
+    variables:
+      name: "World"
+      site: { name: "Markdoc" }
+      author: "John Doe"
+    tags:
+      test:
+        render: test
+        attributes:
+          metadata:
+            type: Object
+            render: true
+  code: |
+    {% test metadata={title="Hello {{$name}}" author="{{$author}}" site="{{$site.name}}"} /%}
+  expected:
+    - tag: test
+      attributes:
+        metadata: {title: "Hello World", author: "John Doe", site: "Markdoc"}
+
+- name: Array values with interpolation are supported
+  config:
+    variables:
+      name: "World"
+      site: { name: "Markdoc" }
+      author: "John Doe"
+    tags:
+      test:
+        render: test
+        attributes:
+          items:
+            type: Array
+            render: true
+  code: |
+    {% test items=["Hello {{$name}}", "{{$author}}", "{{$site.name}}"] /%}
+  expected:
+    - tag: test
+      attributes:
+        items: ["Hello World", "John Doe", "Markdoc"]
+
+- name: Simple nested object interpolation test
+  config:
+    variables:
+      name: "John"
+      theme: "dark"
+      site: "Markdoc"
+    tags:
+      test:
+        render: test
+        attributes:
+          config:
+            type: Object
+            render: true
+          summary:
+            type: String
+            render: true
+  code: |
+    {% test config={user={name="{{$name}} Doe" theme="{{$theme}}"}} summary="User {{$name}} Doe on {{$site}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        config: {
+          user: {name: "John Doe", theme: "dark"},
+        }
+        summary: "User John Doe on Markdoc"
+
+
 - name: Using a backtick in a fenced code block string attribute
   config:
     nodes:
