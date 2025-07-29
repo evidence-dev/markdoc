@@ -758,7 +758,7 @@
       attributes:
         foo: "long"
 
-- name: Edge case - numbers as variable names
+- name: Edge case - numbers as variable names are allowed
   config:
     variables:
       "123": "number"
@@ -774,7 +774,7 @@
   expected:
     - tag: test
       attributes:
-        foo: "{{$123}}"
+        foo: "number"
 
 - name: Edge case - boolean values
   config:

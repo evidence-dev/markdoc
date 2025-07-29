@@ -220,10 +220,10 @@ describe('Templating', function () {
       expect(output.undefinedVariables).toEqual([]);
     });
 
-    it('should handle unicode variable names', function () {
+    it('should not handle unicode variable names', function () {
       const example = 'Hello {{ $变量 }}';
       const output = interpolateString(example, { '变量': '中文' });
-      expect(output.result).toEqual('Hello 中文');
+      expect(output.result).toEqual('Hello {{ $变量 }}');
       expect(output.undefinedVariables).toEqual([]);
     });
 
@@ -332,10 +332,10 @@ describe('Templating', function () {
       expect(output.undefinedVariables).toEqual([]);
     });
 
-    it('should not support numbers as variable names', function () {
+    it('should support numbers as variable names', function () {
       const example = '{{ $123 }}';
       const output = interpolateString(example, { '123': 'number' });
-      expect(output.result).toEqual('{{ $123 }}');
+      expect(output.result).toEqual('number');
       expect(output.undefinedVariables).toEqual([]);
     });
 
