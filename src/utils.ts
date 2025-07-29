@@ -38,7 +38,7 @@ export function interpolateString(value: string, variables?: Record<string, any>
   // Handle escaped interpolation by replacing backslashes before processing
   const unescapedValue = value.replace(/\\\{\{/g, '{{ESCAPED_OPEN}}');
 
-  const pattern = /\{\{\s*\$([a-zA-Z_\u0080-\uFFFF][a-zA-Z0-9_\u0080-\uFFFF]*(\.[a-zA-Z_\u0080-\uFFFF][a-zA-Z0-9_\u0080-\uFFFF]*|\[[0-9]+\])*)\s*\}\}/g;
+  const pattern = /\{\{\s*\$([a-zA-Z_\u0080-\uFFFF][a-zA-Z0-9_\u0080-\uFFFF-]*(\.[a-zA-Z_\u0080-\uFFFF][a-zA-Z0-9_\u0080-\uFFFF-]*|\[[0-9]+\])*)\s*\}\}/g;
   
   const result = unescapedValue.replace(pattern, (match, path) => {
     // Skip if this is our escaped placeholder

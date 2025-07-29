@@ -112,25 +112,15 @@ describe('Transformer', function () {
         expect(result.title).toBe('Null: , Undefined: ');
       });
 
-      it('should handle variables with underscores', function () {
-        const node = createTestNode({ title: 'Hello {{$user_name}} from {{$company_name}}' });
+      it('should handle variables with underscores and hyphens', function () {
+        const node = createTestNode({ title: 'Hello {{$user_name}} from {{$company-name}}' });
         const config = createTestConfig({ 
           user_name: 'John', 
-          company_name: 'Markdoc' 
+          'company-name': 'Markdoc' 
         });
         
         const result = transformer.attributes(node, config);
         expect(result.title).toBe('Hello John from Markdoc');
-      });
-
-      it('should not allow variables with hyphens', function () {
-        const node = createTestNode({ title: 'Hello {{$user-name}}' });
-        const config = createTestConfig({ 
-          user_name: 'John' 
-        });
-        
-        const result = transformer.attributes(node, config);
-        expect(result.title).toBe('Hello {{$user-name}}');
       });
 
       it('should not interpolate when config.variables is undefined', function () {
