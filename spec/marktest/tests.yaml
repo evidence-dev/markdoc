@@ -572,6 +572,23 @@
       children:
         - "foo {{$undefinedVar}}\n"
 
+- name: Hyphens in variable names are not allowed
+  config:
+    variables:
+      "user-name": "john"
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+  code: |
+    {% test foo="{{$user-name}}" /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: "{{$user-name}}"
 
 - name: Edge case - malformed interpolation syntax
   config:
@@ -723,7 +740,6 @@
 - name: Edge case - special characters in variable names
   config:
     variables:
-      "user-name": "john"
       "user_name": "jane"
       "user123": "test"
     tags:
@@ -734,11 +750,11 @@
             type: String
             render: true
   code: |
-    {% test foo="{{$user-name}} {{$user_name}} {{$user123}}" /%}
+    {% test foo="{{$user_name}} {{$user123}}" /%}
   expected:
     - tag: test
       attributes:
-        foo: "john jane test"
+        foo: "jane test"
 
 - name: Edge case - very long variable names
   config:

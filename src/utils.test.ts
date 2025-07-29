@@ -299,13 +299,12 @@ describe('Templating', function () {
     });
 
     it('should handle special characters in variable names', function () {
-      const example = '{{ $user-name }} {{ $user_name }} {{ $user123 }}';
+      const example = '{{ $user_name }} {{ $user123 }}';
       const output = interpolateString(example, { 
-        'user-name': 'john',
         'user_name': 'jane',
         'user123': 'test'
       });
-      expect(output.result).toEqual('john jane test');
+      expect(output.result).toEqual('jane test');
       expect(output.undefinedVariables).toEqual([]);
     });
 
