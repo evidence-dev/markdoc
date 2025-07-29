@@ -21,7 +21,7 @@ Markdoc is a **Markdown**-based \`syntax\` and _toolchain_ for creating ~~custom
 [Link](/href   "title")
     ![Alt](/image   "title")
 
-{% callout #id   .class  .class2   a="check" b={"e":{"with space": 5}} c=8 d=[1,    "2",true,  null] %}
+{% callout #id   .class  .class2   a="check" b={"e"={"with space"=5}} c=8 d=[1,    "2",true,  null] %}
 Markdoc is open-source—check out it's [source](http://github.com/markdoc/markdoc) to see how it works.
 {% /callout %}
 
@@ -59,7 +59,7 @@ Markdoc is a **Markdown**-based \`syntax\` and _toolchain_ for creating ~~custom
    .class
    .class2
    a="check"
-   b={e: {"with space": 5}}
+   b={e={"with space"=5}}
    c=8
    d=[1, "2", true, null] %}
 Markdoc is open-source—check out it's [source](http://github.com/markdoc/markdoc) to see how it works.
@@ -160,6 +160,7 @@ regular_word_with_underscores
 \`\`\`
 
 {% table %}
+- <https://autolink.com>
 - **[Link](https://example.com?q=()**
 - **[Link](https://example.com?q=\\()**
 - **[Link](https://example.com?q=\\(\\))**

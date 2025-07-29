@@ -634,7 +634,7 @@ bar
 
   describe('attribute validation key', () => {
     it('simple case', () => {
-      const example = `{% foo bar={baz: 3} /%}`;
+      const example = `{% foo bar={baz=3} /%}`;
 
       function validator(value, config, name) {
         return value.baz < 5
@@ -672,7 +672,7 @@ bar
     });
 
     it('custom attribute type', () => {
-      const example = `{% foo bar={baz: 3} /%}`;
+      const example = `{% foo bar={baz=3} /%}`;
 
       class CustomType {
         validate(value, config, name) {
