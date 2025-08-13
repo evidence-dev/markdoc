@@ -84,10 +84,10 @@ export default {
 
     if (isPromise(attributes) || isPromise(children)) {
       return Promise.all([attributes, children]).then(
-        (values) => new Tag(schema.render, ...values)
+        (values) => new Tag(schema.render, ...values, node)
       );
     }
 
-    return new Tag(schema.render, attributes, children);
+    return new Tag(schema.render, attributes, children, node);
   },
 } as Transformer;

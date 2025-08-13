@@ -30,7 +30,8 @@ export const heading: Schema = {
     return new Tag(
       `h${node.attributes['level']}`,
       node.transformAttributes(config),
-      node.transformChildren(config)
+      node.transformChildren(config),
+      node
     );
   },
 };
@@ -62,9 +63,9 @@ export const fence: Schema = {
     const attributes = node.transformAttributes(config);
 
     let children;
-    
+
     if (node.children.length) {
-      children = node.transformChildren(config).map(child => {
+      children = node.transformChildren(config).map((child) => {
         if (typeof child === 'string') {
           const interpolation = interpolateString(child, config.variables);
           return interpolation.result;
@@ -72,11 +73,14 @@ export const fence: Schema = {
         return child;
       });
     } else {
-      const interpolation = interpolateString(node.attributes.content, config.variables);
+      const interpolation = interpolateString(
+        node.attributes.content,
+        config.variables
+      );
       children = [interpolation.result];
     }
 
-    return new Tag('pre', attributes, children);
+    return new Tag('pre', attributes, children, node);
   },
 };
 
@@ -122,7 +126,8 @@ export const list: Schema = {
     return new Tag(
       node.attributes.ordered ? 'ol' : 'ul',
       node.transformAttributes(config),
-      node.transformChildren(config)
+      node.transformChildren(config),
+      node
     );
   },
 };
@@ -234,7 +239,7 @@ export const code: Schema = {
   },
   transform(node, config) {
     const attributes = node.transformAttributes(config);
-    return new Tag('code', attributes, [node.attributes.content]);
+    return new Tag('code', attributes, [node.attributes.content], node);
   },
 };
 
