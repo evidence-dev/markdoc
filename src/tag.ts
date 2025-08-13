@@ -2,7 +2,7 @@ import type { RenderableTreeNode } from './types';
 
 let idCounter = 0;
 const getId = (): string => {
-  return `node-${idCounter++}`;
+  return `tag-${idCounter++}`;
 };
 
 export default class Tag<
