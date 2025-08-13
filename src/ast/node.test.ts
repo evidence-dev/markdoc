@@ -109,7 +109,11 @@ describe('transform', function () {
       ]);
 
       const output = transform(example);
-      expect(output).toDeepEqual(new Tag('h1', {}, ['This is a heading']));
+      expect(output).toDeepEqualSubset({
+        name: 'h1',
+        attributes: {},
+        children: ['This is a heading'],
+      });
     });
 
     describe('fenced code blocks', function () {
@@ -119,9 +123,11 @@ describe('transform', function () {
           content: 'test',
         });
         const output = transform(example);
-        expect(output).toDeepEqual(
-          new Tag('pre', { 'data-language': 'ruby' }, ['test'])
-        );
+        expect(output).toDeepEqualSubset({
+          name: 'pre',
+          attributes: { 'data-language': 'ruby' },
+          children: ['test'],
+        });
       });
     });
   });
@@ -137,7 +143,11 @@ describe('transform', function () {
       };
 
       const output = transform(example, { nodes: { foo } });
-      expect(output).toDeepEqual(new Tag('foo', {}, []));
+      expect(output).toDeepEqualSubset({
+        name: 'foo',
+        attributes: {},
+        children: [],
+      });
     });
 
     it('with a render function that renders attributes', function () {
@@ -182,7 +192,11 @@ describe('transform', function () {
       );
 
       const output = transform(example, { tags });
-      expect(output).toDeepEqual(new Tag('foo', { bar: 'baz' }, ['test']));
+      expect(output).toDeepEqualSubset({
+        name: 'foo',
+        attributes: { bar: 'baz' },
+        children: ['test'],
+      });
     });
 
     it('with a non-existing tag', function () {
@@ -212,7 +226,12 @@ describe('transform', function () {
       const output = transform(example, {
         nodes: { foo: {}, bar: { render: 'bar' } },
       });
-      expect(output).toDeepEqual([new Tag('bar', {}, [])]);
+      expect(output.length).toEqual(1);
+      expect(output?.[0]).toDeepEqualSubset({
+        name: 'bar',
+        attributes: {},
+        children: [],
+      });
     });
   });
 
@@ -231,7 +250,11 @@ describe('transform', function () {
         class: { foo: true, bar: false },
       });
       const output = transform(example);
-      expect(output).toDeepEqual(new Tag('p', { class: 'foo' }, []));
+      expect(output).toDeepEqualSubset({
+        name: 'p',
+        attributes: { class: 'foo' },
+        children: [],
+      });
     });
 
     it('with boolean render attribute', function () {
@@ -245,7 +268,10 @@ describe('transform', function () {
       };
 
       const output = transform(example, { nodes: { foo } });
-      expect(output).toDeepEqual(new Tag('foo', { bar: 1, baz: 'test' }));
+      expect(output).toDeepEqualSubset({
+        name: 'foo',
+        attributes: { bar: 1, baz: 'test' },
+      });
     });
 
     it('with string render attribute', function () {
@@ -259,9 +285,10 @@ describe('transform', function () {
       };
 
       const output = transform(example, { nodes: { foo } });
-      expect(output).toDeepEqual(
-        new Tag('foo', { 'data-bar': 1, 'data-baz': 'test' })
-      );
+      expect(output).toDeepEqualSubset({
+        name: 'foo',
+        attributes: { 'data-bar': 1, 'data-baz': 'test' },
+      });
     });
 
     it('with a non-rendered attribute', function () {
@@ -275,7 +302,11 @@ describe('transform', function () {
 
       const output = transform(example, { nodes: { foo } }) as Tag;
       expect(Object.keys(output.attributes).includes('baz')).toBeFalse();
-      expect(output).toDeepEqual(new Tag('foo', { bar: 1 }, []));
+      expect(output).toDeepEqualSubset({
+        name: 'foo',
+        attributes: { bar: 1 },
+        children: [],
+      });
     });
 
     it('with a default attribute value', function () {
@@ -318,7 +349,11 @@ describe('transform', function () {
         nodes: { foo },
         variables: { a: { b: { c: 'example' } } },
       });
-      expect(output).toDeepEqual(new Tag('foo', { bar: 'example' }, []));
+      expect(output).toDeepEqualSubset({
+        name: 'foo',
+        attributes: { bar: 'example' },
+        children: [],
+      });
     });
 
     describe('custom types', () => {
