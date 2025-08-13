@@ -25,7 +25,7 @@ export default class Tag<
     name = 'div' as N,
     attributes = {} as A,
     children: RenderableTreeNode[] = [],
-    readonly astNode: Node
+    readonly astNode: Node | undefined
   ) {
     this.name = name;
     this.attributes = attributes;
