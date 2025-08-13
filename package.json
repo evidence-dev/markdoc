@@ -27,7 +27,8 @@
     "prettier": "prettier --write index.ts src spec",
     "prettier:check": "prettier --check index.ts src spec",
     "type:check": "tsc --noEmit",
-    "typedoc": "typedoc index.ts --includeVersion --readme none --excludePrivate --excludeExternals --excludeInternal --sort source-order --out types"
+    "typedoc": "typedoc index.ts --includeVersion --readme none --excludePrivate --excludeExternals --excludeInternal --sort source-order --out types",
+    "prepublishOnly": "npm run build && npm run test && npm run marktest"
   },
   "engines": {
     "node": ">=14.7.0"
