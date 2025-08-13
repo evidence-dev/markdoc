@@ -20,12 +20,12 @@ export default class Tag<
   name: N;
   attributes: A;
   children: RenderableTreeNode[];
+  astNode?: Node;
 
   constructor(
     name = 'div' as N,
     attributes = {} as A,
-    children: RenderableTreeNode[] = [],
-    readonly astNode: Node
+    children: RenderableTreeNode[] = []
   ) {
     this.name = name;
     this.attributes = attributes;
