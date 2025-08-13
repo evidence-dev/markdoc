@@ -122,7 +122,6 @@ describe('transform', function () {
     it('from paragraph (node without transform)', () => {
       const astNode = new Node('paragraph');
       const tree = transform(astNode);
-      console.log({ tree });
       expect((tree as Tag).astNode).toEqual(astNode);
     });
 
