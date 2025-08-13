@@ -98,11 +98,33 @@ baz
 describe('Tag object', function () {
   describe('traversal', function () {
     it('with a simple document', function () {
-      const example = new Tag('document', {}, [
-        new Tag('heading', { level: 1 }, ['heading text']),
-        new Tag('paragraph', {}, ['paragraph text']),
-        new Tag('some-tag', {}, [new Tag('nested tag', {}, ['some content'])]),
-      ]);
+      const example = new Tag(
+        'document',
+        {},
+        [
+          new Tag(
+            'heading',
+            { level: 1 },
+            ['heading text'],
+            {} as unknown as Node
+          ),
+          new Tag('paragraph', {}, ['paragraph text'], {} as unknown as Node),
+          new Tag(
+            'some-tag',
+            {},
+            [
+              new Tag(
+                'nested tag',
+                {},
+                ['some content'],
+                {} as unknown as Node
+              ),
+            ],
+            {} as unknown as Node
+          ),
+        ],
+        {} as unknown as Node
+      );
 
       const iter = example.walk();
       expect(typeof iter[Symbol.iterator]).toEqual('function');
@@ -148,7 +170,7 @@ describe('transform', function () {
           my_tag: {
             render: 'my_tag',
             transform(node) {
-              return new Tag(undefined, undefined, undefined);
+              return new Tag(undefined, undefined, undefined, node);
             },
           },
         },
@@ -195,7 +217,7 @@ describe('transform', function () {
 
       const foo = {
         transform() {
-          return new Tag('foo', {}, []);
+          return new Tag('foo', {}, [], {} as unknown as Node);
         },
       };
 
