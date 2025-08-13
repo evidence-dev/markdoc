@@ -118,6 +118,46 @@ describe('transform', function () {
     return markdoc.transform(content, config);
   }
 
+  describe('RenderableTreeNode should have astNode', () => {
+    it('from paragraph (node without transform)', () => {
+      const astNode = new Node('paragraph');
+      const tree = transform(astNode);
+      console.log({ tree });
+      expect((tree as Tag).astNode).toEqual(astNode);
+    });
+
+    it('from heading (node with transform)', () => {
+      const astNode = new Node('heading');
+      const tree = transform(astNode);
+      expect((tree as Tag).astNode).toEqual(astNode);
+    });
+
+    it('from tag without transform', () => {
+      const astNode = new Node('tag', { something: 'blah' }, [], 'my_tag');
+      const tree = transform(astNode, {
+        tags: {
+          my_tag: { render: 'my_tag' },
+        },
+      });
+      expect((tree as Tag).astNode).toEqual(astNode);
+    });
+
+    it('from tag with transform', () => {
+      const astNode = new Node('tag', { something: 'blah' }, [], 'my_tag');
+      const tree = transform(astNode, {
+        tags: {
+          my_tag: {
+            render: 'my_tag',
+            transform(node) {
+              return new Tag(undefined, undefined, undefined);
+            },
+          },
+        },
+      });
+      expect((tree as Tag).astNode).toEqual(astNode);
+    });
+  });
+
   describe('built-in nodes', function () {
     it('a heading node', function () {
       const example = new Node('heading', { level: 1 }, [

@@ -1,4 +1,4 @@
-import type { RenderableTreeNode } from './types';
+import type { Node, RenderableTreeNode } from './types';
 
 let idCounter = 0;
 const getId = (): string => {
@@ -20,6 +20,7 @@ export default class Tag<
   name: N;
   attributes: A;
   children: RenderableTreeNode[];
+  astNode?: Node;
 
   constructor(
     name = 'div' as N,

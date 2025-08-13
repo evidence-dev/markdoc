@@ -12,6 +12,8 @@ import type {
   Schema,
   ValidationError,
 } from '../types';
+import { isPromise } from '../utils';
+import Tag from '../tag';
 
 export default class Node implements AstType {
   readonly $$mdtype = 'Node';
@@ -91,6 +93,37 @@ export default class Node implements AstType {
   }
 
   transform(config: Config): MaybePromise<RenderableTreeNodes> {
-    return transformer.node(this, config);
+    const transformed = transformer.node(this, config);
+    setAstNode(transformed, this);
+    return transformed;
   }
 }
+
+const setAstNode = (
+  transformed: MaybePromise<RenderableTreeNodes>,
+  astNode: Node
+): void => {
+  if (isPromise(transformed)) {
+    transformed.then((result) => {
+      if (Tag.isTag(result)) {
+        result.astNode = astNode;
+      } else if (Array.isArray(result)) {
+        result.forEach((t) => {
+          if (Tag.isTag(t)) {
+            t.astNode = astNode;
+          }
+        });
+      }
+    });
+  } else {
+    if (Tag.isTag(transformed)) {
+      transformed.astNode = astNode;
+    } else if (Array.isArray(transformed)) {
+      transformed.forEach((t) => {
+        if (Tag.isTag(t)) {
+          t.astNode = astNode;
+        }
+      });
+    }
+  }
+};
