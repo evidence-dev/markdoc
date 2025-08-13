@@ -95,6 +95,24 @@ baz
   });
 });
 
+describe('Tag object', function () {
+  describe('traversal', function () {
+    it('with a simple document', function () {
+      const example = new Tag('document', {}, [
+        new Tag('heading', { level: 1 }, ['heading text']),
+        new Tag('paragraph', {}, ['paragraph text']),
+        new Tag('some-tag', {}, [new Tag('nested tag', {}, ['some content'])]),
+      ]);
+
+      const iter = example.walk();
+      expect(typeof iter[Symbol.iterator]).toEqual('function');
+
+      const output = [...iter];
+      expect(output.length).toEqual(7);
+    });
+  });
+});
+
 describe('transform', function () {
   function transform(content, config = {}) {
     return markdoc.transform(content, config);

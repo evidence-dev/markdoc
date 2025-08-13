@@ -30,4 +30,13 @@ export default class Tag<
     this.attributes = attributes;
     this.children = children;
   }
+
+  *walk(): Generator<RenderableTreeNode, void, unknown> {
+    for (const child of this.children) {
+      yield child;
+      if (Tag.isTag(child)) {
+        yield* child.walk();
+      }
+    }
+  }
 }
