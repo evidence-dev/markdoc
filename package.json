@@ -1,7 +1,7 @@
 {
   "name": "@zachstence/markdoc",
   "author": "Ryan Paul",
-  "version": "0.0.0-evidence.21",
+  "version": "0.0.0-evidence.22",
   "description": "A text markup language for documentation",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
