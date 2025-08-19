@@ -16,9 +16,9 @@ export default class Tag<
   };
 
   constructor(
-    readonly name = 'div' as N,
-    readonly attributes = {} as A,
-    readonly children: RenderableTreeNode[] = [],
+    public name = 'div' as N,
+    public attributes = {} as A,
+    public children: RenderableTreeNode[] = [],
     readonly location: Location | undefined = undefined,
     readonly lines: number[] | undefined = undefined,
     readonly id = getId()
