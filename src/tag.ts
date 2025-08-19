@@ -1,4 +1,4 @@
-import type { Node, RenderableTreeNode } from './types';
+import type { Location, RenderableTreeNode } from './types';
 
 let idCounter = 0;
 const getId = (): string => {
@@ -11,33 +11,16 @@ export default class Tag<
 > {
   readonly $$mdtype = 'Tag' as const;
 
-  readonly id = getId();
-
   static isTag = (tag: any): tag is Tag => {
     return !!(tag?.$$mdtype === 'Tag');
   };
 
-  name: N;
-  attributes: A;
-  children: RenderableTreeNode[];
-
   constructor(
-    name = 'div' as N,
-    attributes = {} as A,
-    children: RenderableTreeNode[] = [],
-    readonly astNode: Node | undefined
-  ) {
-    this.name = name;
-    this.attributes = attributes;
-    this.children = children;
-  }
-
-  *walk(): Generator<RenderableTreeNode, void, unknown> {
-    for (const child of this.children) {
-      yield child;
-      if (Tag.isTag(child)) {
-        yield* child.walk();
-      }
-    }
-  }
+    readonly name = 'div' as N,
+    readonly attributes = {} as A,
+    readonly children: RenderableTreeNode[] = [],
+    readonly location: Location | undefined = undefined,
+    readonly lines: number[] | undefined = undefined,
+    readonly id = getId()
+  ) {}
 }
