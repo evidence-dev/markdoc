@@ -31,7 +31,8 @@ export const heading: Schema = {
       `h${node.attributes['level']}`,
       node.transformAttributes(config),
       node.transformChildren(config),
-      node
+      node.location,
+      node.lines
     );
   },
 };
@@ -80,7 +81,7 @@ export const fence: Schema = {
       children = [interpolation.result];
     }
 
-    return new Tag('pre', attributes, children, node);
+    return new Tag('pre', attributes, children, node.location, node.lines);
   },
 };
 
@@ -127,7 +128,8 @@ export const list: Schema = {
       node.attributes.ordered ? 'ol' : 'ul',
       node.transformAttributes(config),
       node.transformChildren(config),
-      node
+      node.location,
+      node.lines
     );
   },
 };
@@ -239,7 +241,13 @@ export const code: Schema = {
   },
   transform(node, config) {
     const attributes = node.transformAttributes(config);
-    return new Tag('code', attributes, [node.attributes.content], node);
+    return new Tag(
+      'code',
+      attributes,
+      [node.attributes.content],
+      node.location,
+      node.lines
+    );
   },
 };
 

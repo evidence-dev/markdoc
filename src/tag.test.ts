@@ -12,6 +12,6 @@ describe('Tag.isTag', function () {
   });
 
   it('should detect tags', () => {
-    expect(Tag.isTag(new Tag('tag', {}, []))).toBe(true);
+    expect(Tag.isTag(new Tag('tag'))).toBe(true);
   });
 });
