@@ -247,7 +247,10 @@ export const text: Schema = {
   attributes: {
     content: { type: String, required: true },
   },
-  transform(node) {
+  transform(node, config) {
+    if (config?.variables) {
+      return interpolateString(node.attributes.content, config.variables).result;
+    }
     return node.attributes.content;
   },
 };
