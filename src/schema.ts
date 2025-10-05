@@ -248,10 +248,16 @@ export const text: Schema = {
     content: { type: String, required: true },
   },
   transform(node, config) {
-    if (config?.variables) {
-      return interpolateString(node.attributes.content, config.variables).result;
-    }
-    return node.attributes.content;
+    const content = node.attributes.content as any;
+    const resolved =
+      content && typeof content === 'object' && typeof content.resolve === 'function' && content.$$mdtype === 'Variable'
+        ? content.resolve(config)
+        : content;
+
+    if (typeof resolved === 'string' && config?.variables)
+      return interpolateString(resolved, config.variables).result;
+
+    return resolved;
   },
 };
 
