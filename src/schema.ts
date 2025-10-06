@@ -248,16 +248,17 @@ export const text: Schema = {
     content: { type: String, required: true },
   },
   transform(node, config) {
-    const content = node.attributes.content as any;
-    const resolved =
-      content && typeof content === 'object' && typeof content.resolve === 'function' && content.$$mdtype === 'Variable'
-        ? content.resolve(config)
-        : content;
-
-    if (typeof resolved === 'string' && config?.variables)
-      return interpolateString(resolved, config.variables).result;
-
-    return resolved;
+    const content = node.attributes.content;
+    
+    // Handle Variable AST nodes (e.g. {% $foo %})
+    if (content && typeof content === 'object' && 'resolve' in content)
+      return content.resolve(config);
+    
+    // Handle string interpolation (e.g. Hello {{$name}})
+    if (typeof content === 'string' && config?.variables)
+      return interpolateString(content, config.variables).result;
+    
+    return content;
   },
 };
 
