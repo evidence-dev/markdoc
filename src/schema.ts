@@ -255,8 +255,18 @@ export const text: Schema = {
   attributes: {
     content: { type: String, required: true },
   },
-  transform(node) {
-    return node.attributes.content;
+  transform(node, config) {
+    const content = node.attributes.content;
+    
+    // Handle Variable AST nodes (e.g. {% $foo %})
+    if (content && typeof content === 'object' && 'resolve' in content)
+      return content.resolve(config);
+    
+    // Handle string interpolation (e.g. Hello {{$name}})
+    if (typeof content === 'string' && config?.variables)
+      return interpolateString(content, config.variables).result;
+    
+    return content;
   },
 };
 
