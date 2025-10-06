@@ -95,62 +95,24 @@ baz
   });
 });
 
-describe('Tag object', function () {
-  describe('traversal', function () {
-    it('with a simple document', function () {
-      const example = new Tag(
-        'document',
-        {},
-        [
-          new Tag(
-            'heading',
-            { level: 1 },
-            ['heading text'],
-            {} as unknown as Node
-          ),
-          new Tag('paragraph', {}, ['paragraph text'], {} as unknown as Node),
-          new Tag(
-            'some-tag',
-            {},
-            [
-              new Tag(
-                'nested tag',
-                {},
-                ['some content'],
-                {} as unknown as Node
-              ),
-            ],
-            {} as unknown as Node
-          ),
-        ],
-        {} as unknown as Node
-      );
-
-      const iter = example.walk();
-      expect(typeof iter[Symbol.iterator]).toEqual('function');
-
-      const output = [...iter];
-      expect(output.length).toEqual(7);
-    });
-  });
-});
-
 describe('transform', function () {
   function transform(content, config = {}) {
     return markdoc.transform(content, config);
   }
 
-  describe('RenderableTreeNode should have astNode', () => {
+  describe('RenderableTreeNode should have astNode location/lines', () => {
     it('from paragraph (node without transform)', () => {
       const astNode = new Node('paragraph');
       const tree = transform(astNode);
-      expect((tree as Tag).astNode).toEqual(astNode);
+      expect((tree as Tag).location).toEqual(astNode.location);
+      expect((tree as Tag).lines).toEqual(astNode.lines);
     });
 
     it('from heading (node with transform)', () => {
       const astNode = new Node('heading');
       const tree = transform(astNode);
-      expect((tree as Tag).astNode).toEqual(astNode);
+      expect((tree as Tag).location).toEqual(astNode.location);
+      expect((tree as Tag).lines).toEqual(astNode.lines);
     });
 
     it('from tag without transform', () => {
@@ -160,7 +122,8 @@ describe('transform', function () {
           my_tag: { render: 'my_tag' },
         },
       });
-      expect((tree as Tag).astNode).toEqual(astNode);
+      expect((tree as Tag).location).toEqual(astNode.location);
+      expect((tree as Tag).lines).toEqual(astNode.lines);
     });
 
     it('from tag with transform', () => {
@@ -169,13 +132,20 @@ describe('transform', function () {
         tags: {
           my_tag: {
             render: 'my_tag',
-            transform(node) {
-              return new Tag(undefined, undefined, undefined, node);
+            transform(node: Node) {
+              return new Tag(
+                undefined,
+                undefined,
+                undefined,
+                node.location,
+                node.lines
+              );
             },
           },
         },
       });
-      expect((tree as Tag).astNode).toEqual(astNode);
+      expect((tree as Tag).location).toEqual(astNode.location);
+      expect((tree as Tag).lines).toEqual(astNode.lines);
     });
   });
 
@@ -217,7 +187,7 @@ describe('transform', function () {
 
       const foo = {
         transform() {
-          return new Tag('foo', {}, [], {} as unknown as Node);
+          return new Tag('foo');
         },
       };
 
