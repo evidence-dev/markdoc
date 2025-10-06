@@ -2146,6 +2146,145 @@
         - tag: p
           children: [This is a test]
 
+- name: Bare text interpolation in paragraph
+  config:
+    variables:
+      name: World
+  code: |
+    Hello {{$name}}
+  expected:
+    - tag: p
+      children: [Hello World]
+
+- name: Bare text interpolation in heading
+  config:
+    variables:
+      name: World
+  code: |
+    # Hello {{$name}}
+  expected:
+    - tag: h1
+      children: [Hello World]
+
+- name: Unordered list item with interpolation
+  config:
+    variables:
+      name: World
+  code: |
+    - Hello {{$name}}
+  expected:
+    - tag: ul
+      children:
+        - tag: li
+          children: [Hello World]
+
+- name: Ordered list item with interpolation
+  config:
+    variables:
+      num: 42
+  code: |
+    1. Value: {{$num}}
+  expected:
+    - tag: ol
+      children:
+        - tag: li
+          children: ['Value: 42']
+
+- name: Multiple list items with different variables
+  config:
+    variables:
+      a: foo
+      b: bar
+  code: |
+    - {{$a}}
+    - test {{$b}}
+  expected:
+    - tag: ul
+      children:
+        - tag: li
+          children: [foo]
+        - tag: li
+          children: [test bar]
+
+- name: Nested unordered list with interpolation
+  config:
+    variables:
+      parent: Top
+      child: Bottom
+  code: |
+    - {{$parent}}
+      - {{$child}}
+  expected:
+    - tag: ul
+      children:
+        - tag: li
+          children:
+            - Top
+            - tag: ul
+              children:
+                - tag: li
+                  children: [Bottom]
+
+- name: Blockquote with interpolation
+  config:
+    variables:
+      quote: Hello
+  code: |
+    > {{$quote}} World
+  expected:
+    - tag: blockquote
+      children:
+        - tag: p
+          children: [Hello World]
+
+- name: Blockquote with multiple paragraphs and interpolation
+  config:
+    variables:
+      a: First
+      b: Second
+  code: |
+    > {{$a}}
+    >
+    > {{$b}}
+  expected:
+    - tag: blockquote
+      children:
+        - tag: p
+          children: [First]
+        - tag: p
+          children: [Second]
+
+- name: Blockquote with list and interpolation
+  config:
+    variables:
+      a: foo
+  code: |
+    > - {{$a}}
+    > - static
+  expected:
+    - tag: blockquote
+      children:
+        - tag: ul
+          children:
+            - tag: li
+              children: [foo]
+            - tag: li
+              children: [static]
+
+- name: No interpolation inside inline code
+  config:
+    variables:
+      name: World
+  code: |
+    This is `{{$name}}`
+  expected:
+    - tag: p
+      children:
+        - 'This is '
+        - tag: code
+          children:
+            - '{{$name}}'
+
 - name: Multiline block tags with closing on line with content
   config:
     tags:
