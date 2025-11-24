@@ -2302,3 +2302,141 @@
       children:
         - tag: p
           children: [This is a test]
+
+- name: Triple-quoted string attribute
+  config:
+    tags:
+      test:
+        render: test
+        attributes:
+          bar:
+            type: String
+            render: true
+  code: |
+    {% test bar="""simple string""" /%}
+  expected:
+    - tag: test
+      attributes:
+        bar: 'simple string'
+
+- name: Triple-quoted string with quotes inside
+  config:
+    tags:
+      test:
+        render: test
+        attributes:
+          bar:
+            type: String
+            render: true
+  code: |
+    {% test bar="""He said "hello" and 'goodbye'""" /%}
+  expected:
+    - tag: test
+      attributes:
+        bar: 'He said "hello" and ''goodbye'''
+
+- name: Triple-quoted string with newlines
+  config:
+    tags:
+      test:
+        render: test
+        attributes:
+          query:
+            type: String
+            render: true
+  code: |
+    {% test query="""
+    SELECT *
+    FROM users
+    WHERE active = true
+    """ /%}
+  expected:
+    - tag: test
+      attributes:
+        query: "\nSELECT *\nFROM users\nWHERE active = true\n"
+
+- name: Triple-quoted string with SQL CASE statement
+  config:
+    tags:
+      table:
+        render: table
+        attributes:
+          series:
+            type: String
+            render: true
+  code: |
+    {% table series="""
+        case
+            when total_sales > 18000 then 'High'
+            when total_sales > 9000 then 'Medium'
+            else 'Low'
+        end
+    """ /%}
+  expected:
+    - tag: table
+      attributes:
+        series: "\n    case\n        when total_sales > 18000 then 'High'\n        when total_sales > 9000 then 'Medium'\n        else 'Low'\n    end\n"
+
+- name: Mixed regular and triple-quoted strings
+  config:
+    tags:
+      test:
+        render: test
+        attributes:
+          foo:
+            type: String
+            render: true
+          bar:
+            type: String
+            render: true
+          baz:
+            type: Boolean
+            render: true
+  code: |
+    {% test foo="regular" bar="""triple
+    quoted""" baz=true /%}
+  expected:
+    - tag: test
+      attributes:
+        foo: 'regular'
+        bar: "triple\nquoted"
+        baz: true
+
+- name: Empty triple-quoted string
+  config:
+    tags:
+      test:
+        render: test
+        attributes:
+          bar:
+            type: String
+            render: true
+  code: |
+    {% test bar="""""" /%}
+  expected:
+    - tag: test
+      attributes:
+        bar: ''
+
+- name: Triple-quoted string with interpolation
+  config:
+    variables:
+      condition: "status = 'active'"
+    tags:
+      test:
+        render: test
+        attributes:
+          query:
+            type: String
+            render: true
+  code: |
+    {% test query="""
+    SELECT *
+    FROM users
+    WHERE {{$condition}}
+    """ /%}
+  expected:
+    - tag: test
+      attributes:
+        query: "\nSELECT *\nFROM users\nWHERE status = 'active'\n"
+

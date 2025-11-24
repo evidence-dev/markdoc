@@ -159,6 +159,16 @@ ValueNumber 'number' =
   '-'? [0-9]+ ('.'[0-9]+)? { return parseFloat(text()); }
 
 ValueString 'string' =
+  ValueTripleQuotedString /
+  ValueQuotedString
+
+ValueTripleQuotedString =
+  '"""' value:ValueTripleQuotedChars* '"""' { return value.join(''); }
+
+ValueTripleQuotedChars =
+  !'"""' char:. { return char; }
+
+ValueQuotedString =
   '"' value:ValueStringChars* '"' { return value.join(''); }
 
 ValueStringChars = 
