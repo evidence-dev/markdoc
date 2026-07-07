@@ -8,6 +8,7 @@ enum STATES {
   normal,
   string,
   escape,
+  triple_string,
 }
 
 export const OPEN = '{%';
@@ -154,9 +155,21 @@ export function findTagEnd(content: string, start = 0) {
       case STATES.escape:
         state = STATES.string;
         break;
+      case STATES.triple_string:
+        if (char === '"' && content[pos + 1] === '"' && content[pos + 2] === '"') {
+          state = STATES.normal;
+          pos += 2; // Skip the next two quotes
+        }
+        break;
       case STATES.normal:
-        if (char === '"') state = STATES.string;
-        else if (content.startsWith(CLOSE, pos)) return pos;
+        if (char === '"' && content[pos + 1] === '"' && content[pos + 2] === '"') {
+          state = STATES.triple_string;
+          pos += 2; // Skip the next two quotes
+        } else if (char === '"') {
+          state = STATES.string;
+        } else if (content.startsWith(CLOSE, pos)) {
+          return pos;
+        }
     }
   }
 

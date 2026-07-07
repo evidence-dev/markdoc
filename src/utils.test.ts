@@ -182,6 +182,67 @@ describe('Templating', function () {
         },
       ]);
     });
+
+    describe('triple-quoted strings', function () {
+      it('with simple triple-quoted string', function () {
+        const example = '{% foo bar="""test""" %}';
+        const end = findTagEnd(example, 2);
+        expect(end).toEqual(22);
+        expect(example[end]).toEqual('%');
+      });
+
+      it('with multi-line triple-quoted string', function () {
+        const example = '{% foo bar="""line1\nline2\nline3""" %}';
+        const end = findTagEnd(example, 2);
+        expect(end).toEqual(35);
+        expect(example[end]).toEqual('%');
+      });
+
+      it('with quotes inside triple-quoted string', function () {
+        const example = '{% foo bar="""He said "hello"!""" %}';
+        const end = findTagEnd(example, 2);
+        expect(end).toEqual(34);
+        expect(example[end]).toEqual('%');
+      });
+
+      it('with multi-line SQL case statement', function () {
+        const example = `{% table
+    data="demo_daily_orders"
+    date="date"
+    series="""
+        case
+            when total_sales > 18000 then 'High'
+            when total_sales > 9000 then 'Medium'
+            else 'Low'
+        end
+    """
+/%}`;
+        const end = findTagEnd(example, 2);
+        expect(end).toEqual(example.length - 2);
+        expect(example[end]).toEqual('%');
+      });
+
+      it('with multiple attributes including triple-quoted', function () {
+        const example = '{% foo bar="test" baz="""multi\nline""" test=true %}';
+        const end = findTagEnd(example, 2);
+        expect(end).toEqual(49);
+        expect(example[end]).toEqual('%');
+      });
+
+      it('with empty triple-quoted string', function () {
+        const example = '{% foo bar="""""" %}';
+        const end = findTagEnd(example, 2);
+        expect(end).toEqual(18);
+        expect(example[end]).toEqual('%');
+      });
+
+      it('with triple-quoted and regular quoted strings', function () {
+        const example = '{% foo a="first" b="""second""" c="third" %}';
+        const end = findTagEnd(example, 2);
+        expect(end).toEqual(42);
+        expect(example[end]).toEqual('%');
+      });
+    });
   });
 
   describe('interpolateString', function () {

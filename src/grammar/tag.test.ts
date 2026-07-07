@@ -356,5 +356,67 @@ describe('Markdoc tag parser', function () {
       for (const example of examples)
         expect(() => parse(example)).toThrowError(SyntaxError);
     });
+
+    describe('with triple-quoted strings', function () {
+      it('with a simple triple-quoted string', function () {
+        const example = parse('foo="""bar"""');
+        expect(example.meta.attributes).toDeepEqual([
+          { type: 'attribute', name: 'foo', value: 'bar' },
+        ]);
+      });
+
+      it('with multi-line triple-quoted string', function () {
+        const example = parse('foo="""line1\nline2\nline3"""');
+        expect(example.meta.attributes).toDeepEqual([
+          { type: 'attribute', name: 'foo', value: 'line1\nline2\nline3' },
+        ]);
+      });
+
+      it('with quotes inside triple-quoted string', function () {
+        const example = parse('foo="""He said "hello"!"""');
+        expect(example.meta.attributes).toDeepEqual([
+          { type: 'attribute', name: 'foo', value: 'He said "hello"!' },
+        ]);
+      });
+
+      it('with SQL case statement', function () {
+        const example = parse(`series="""
+        case
+            when total_sales > 18000 then 'High'
+            when total_sales > 9000 then 'Medium'
+            else 'Low'
+        end
+    """`);
+        expect(example.meta.attributes).toDeepEqual([
+          {
+            type: 'attribute',
+            name: 'series',
+            value: `
+        case
+            when total_sales > 18000 then 'High'
+            when total_sales > 9000 then 'Medium'
+            else 'Low'
+        end
+    `,
+          },
+        ]);
+      });
+
+      it('with multiple attributes including triple-quoted', function () {
+        const example = parse('foo="bar" baz="""multi\nline""" test=true');
+        expect(example.meta.attributes).toDeepEqual([
+          { type: 'attribute', name: 'foo', value: 'bar' },
+          { type: 'attribute', name: 'baz', value: 'multi\nline' },
+          { type: 'attribute', name: 'test', value: true },
+        ]);
+      });
+
+      it('with empty triple-quoted string', function () {
+        const example = parse('foo=""""""');
+        expect(example.meta.attributes).toDeepEqual([
+          { type: 'attribute', name: 'foo', value: '' },
+        ]);
+      });
+    });
   });
 });
