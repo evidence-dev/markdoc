@@ -384,6 +384,69 @@ describe('Templating', function () {
       expect(output.undefinedVariables).toEqual([]);
     });
 
+    it('should use the variable when defined and ignore the fallback', function () {
+      const example = "foo {{ $defined | 'x' }}";
+      const output = interpolateString(example, { defined: 'test' });
+      expect(output.result).toEqual('foo test');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should use the fallback when the variable is missing and still warn', function () {
+      const example = 'foo {{ $missing | Attendance }}';
+      const output = interpolateString(example, { other: 'test' });
+      expect(output.result).toEqual('foo Attendance');
+      expect(output.undefinedVariables).toEqual(['missing']);
+    });
+
+    it('should strip a single quote pair from a quoted fallback', function () {
+      const example = "foo {{ $missing | 'total_attendance' }}";
+      const output = interpolateString(example, { other: 'test' });
+      expect(output.result).toEqual('foo total_attendance');
+      expect(output.undefinedVariables).toEqual(['missing']);
+    });
+
+    it('should strip a single double-quote pair from a quoted fallback', function () {
+      const example = 'foo {{ $missing | "total_attendance" }}';
+      const output = interpolateString(example, { other: 'test' });
+      expect(output.result).toEqual('foo total_attendance');
+      expect(output.undefinedVariables).toEqual(['missing']);
+    });
+
+    it('should leave {{ $missing }} unchanged with no fallback (regression guard)', function () {
+      const example = 'foo {{ $missing }}';
+      const output = interpolateString(example, { other: 'test' });
+      expect(output.result).toEqual('foo {{ $missing }}');
+      expect(output.undefinedVariables).toEqual(['missing']);
+    });
+
+    it('should apply a fallback for a missing nested path', function () {
+      const example = "{{ $a.b.c | 'x' }}";
+      const output = interpolateString(example, { a: { b: {} } });
+      expect(output.result).toEqual('x');
+      expect(output.undefinedVariables).toEqual(['a.b.c']);
+    });
+
+    it('should treat an empty fallback as an empty string and still warn', function () {
+      const example = 'foo {{ $missing | }}bar';
+      const output = interpolateString(example, { other: 'test' });
+      expect(output.result).toEqual('foo bar');
+      expect(output.undefinedVariables).toEqual(['missing']);
+    });
+
+    it('should not apply the fallback when the variable resolves to null', function () {
+      const example = "{{ $nullVal | 'fallback' }}";
+      const output = interpolateString(example, { nullVal: null });
+      expect(output.result).toEqual('');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
+    it('should leave an escaped interpolation with a fallback literal', function () {
+      const example = 'foo \\{{ $x | y }}';
+      const output = interpolateString(example, { x: 'test' });
+      expect(output.result).toEqual('foo \\{{ $x | y }}');
+      expect(output.undefinedVariables).toEqual([]);
+    });
+
     it('should handle very long variable names', function () {
       const example = '{{ $very_long_variable_name_that_exceeds_normal_length_limits }}';
       const output = interpolateString(example, { 

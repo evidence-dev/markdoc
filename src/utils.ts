@@ -29,24 +29,51 @@ export interface InterpolationResult {
   undefinedVariables: string[];
 }
 
+// If `value` begins and ends with the same quote character (' or "), strip that
+// single outer pair; otherwise return it unchanged. Used so a fallback renders the
+// same shape as a defined value (e.g. `| 'total_attendance'` -> total_attendance).
+function stripOneQuotePair(value: string): string {
+  if (
+    value.length >= 2 &&
+    (value[0] === "'" || value[0] === '"') &&
+    value[value.length - 1] === value[0]
+  ) {
+    return value.slice(1, -1);
+  }
+  return value;
+}
+
 export function interpolateString(value: string, variables?: Record<string, any>): InterpolationResult {
   const undefinedVariables: string[] = [];
-  
+
   if (!variables || Object.keys(variables).length === 0) {
     return { result: value, undefinedVariables: [] };
   }
-  
+
   // Handle escaped interpolation by replacing backslashes before processing
   const unescapedValue = value.replace(/\\\{\{/g, '{{ESCAPED_OPEN}}');
 
-  const pattern = /\{\{\s*\$([a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]*|\[[0-9]+\])*)\s*\}\}/g;
-  
-  const result = unescapedValue.replace(pattern, (match, path) => {
+  // Matches {{ $path }} with an optional trailing `| fallback`.
+  // Group 1 = variable path (inner alternation is non-capturing).
+  // Group 2 = raw fallback text (flat literal; cannot contain `}` or nested {{ }}).
+  const pattern = /\{\{\s*\$([a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]*|\[[0-9]+\])*)\s*(?:\|\s*([^}]*?)\s*)?\}\}/g;
+
+  const result = unescapedValue.replace(pattern, (match, path, fallbackRaw) => {
     // Skip if this is our escaped placeholder
     if (path === 'ESCAPED_OPEN') {
       return match;
     }
-    
+
+    // Called when the path cannot be resolved (bad array index, missing key, or a
+    // non-object encountered mid-path). Always flags the variable as undefined
+    // (DECISION 1), then applies the fallback if one was supplied, else leaves the
+    // original text untouched (preserving pre-fallback behavior).
+    const resolveUnresolved = () => {
+      undefinedVariables.push(path);
+      if (fallbackRaw === undefined) return match;
+      return stripOneQuotePair(fallbackRaw);
+    };
+
     // Parse the path to handle both dot notation and array access
     const pathParts: string[] = [];
     let currentPart = '';
@@ -93,19 +120,16 @@ export function interpolateString(value: string, variables?: Record<string, any>
           if (Array.isArray(variableValue) && index >= 0 && index < variableValue.length) {
             variableValue = variableValue[index];
           } else {
-            undefinedVariables.push(path);
-            return match;
+            return resolveUnresolved();
           }
         } else if (part in variableValue) {
           // Object property access
           variableValue = variableValue[part];
         } else {
-          undefinedVariables.push(path);
-          return match;
+          return resolveUnresolved();
         }
       } else {
-        undefinedVariables.push(path);
-        return match;
+        return resolveUnresolved();
       }
     }
     
